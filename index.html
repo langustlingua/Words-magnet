@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LANGUST — Spotlight 2 класс</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F7F9FC;
+    --card:#FFFFFF;
+    --ink:#2D3648;
+    --ink-soft:#8B93A1;
+    --coral:#3FA9F5;
+    --coral-dark:#2B8FDB;
+    --teal:#22B8CC;
+    --green:#5AA82E;
+    --red:#EF476F;
+    --lock-bg:#EFE9DD;
+    --shadow: 0 8px 24px rgba(43,53,66,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  h1,h2,h3{font-family:'Nunito',sans-serif; font-weight:800;}
+  .wrap{max-width:480px; margin:0 auto; padding:16px 16px 40px;}
+
+  /* ---------- HEADER ---------- */
+  .reminder-banner{
+    display:none;
+    background:#EAF4FF;
+    border:1px solid #BFE0FF;
+    border-radius:12px;
+    padding:9px 12px;
+    margin:10px 0 0;
+    font-size:12px;
+    line-height:1.45;
+    color:var(--coral-dark);
+    font-weight:700;
+    position:sticky;
+    top:8px;
+    z-index:50;
+    box-shadow:0 4px 14px rgba(43,53,66,0.10);
+  }
+  .reminder-banner b{color:var(--ink);}
+  .grade-tabs{display:flex; gap:8px; margin:16px 0 14px;}
+  .grade-tab{
+    flex:1; text-align:center; padding:10px 6px; border-radius:12px; font-weight:800; font-size:13px;
+    background:var(--card); color:var(--ink-soft); box-shadow:var(--shadow); cursor:pointer;
+  }
+  .grade-tab.active{background:var(--coral); color:white;}
+  .grade-tab[data-grade="2"].active{background:linear-gradient(135deg,#B84FD1,#8A3FB0);}
+  .grade-tab[data-grade="3"].active{background:linear-gradient(135deg,#8BC34A,#5AA82E);}
+  .grade-tab[data-grade="4"].active{background:linear-gradient(135deg,#F4A15B,#E8823A);}
+  .brandbar{display:flex; align-items:center; justify-content:space-between; padding:14px 4px 18px;}
+  .brand{display:flex; align-items:center; gap:8px; font-weight:800; font-size:20px; color:var(--ink);}
+  .unit-badge{background:var(--coral); color:white; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px;}
+  .hero{
+    background:var(--ink); color:white; border-radius:20px; padding:22px 20px; margin-bottom:18px;
+    position:relative; overflow:hidden;
+  }
+  .hero::after{content:"🐱"; position:absolute; right:-6px; bottom:-14px; font-size:80px; opacity:.15; transform:rotate(-8deg);}
+  .hero h1{margin:0 0 6px; font-size:21px; line-height:1.3;}
+  .hero p{margin:0; font-size:13.5px; opacity:.9; line-height:1.5;}
+
+  /* ---------- SCREENS ---------- */
+  .screen{display:none;}
+  .screen.active{display:block;}
+  .panel{
+    background:var(--card); border-radius:20px; padding:20px; box-shadow:var(--shadow);
+    min-height:340px; display:flex; flex-direction:column;
+  }
+  .back-link{
+    background:none; border:none; color:var(--ink-soft); font-weight:700; font-size:13px;
+    cursor:pointer; padding:6px 0; margin-bottom:6px; text-align:left;
+  }
+  .screen-toprow{display:flex; align-items:center; justify-content:space-between; margin-bottom:2px;}
+  .screen-toprow .back-link{margin-bottom:0;}
+  .stop-btn{
+    background:#FDEAEF; color:var(--red); border:none; border-radius:10px;
+    font-weight:800; font-size:12.5px; padding:7px 12px; cursor:pointer;
+  }
+  .progress-row{display:flex; align-items:center; gap:10px; margin-bottom:16px;}
+  .progress-bar{flex:1; height:8px; background:#EEF1F6; border-radius:99px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--coral); border-radius:99px; transition:width .25s ease;}
+  .progress-count{font-size:12px; font-weight:700; color:var(--ink-soft); white-space:nowrap;}
+
+  /* ---------- UNIT LIST ---------- */
+  .unit-list{display:grid; grid-template-columns:1fr; gap:12px;}
+  @media (min-width:460px){ .unit-list{grid-template-columns:1fr 1fr;} }
+  .unit-card{
+    background:var(--card); border-radius:18px; padding:16px; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; gap:10px; cursor:pointer;
+    border:2px solid transparent; transition:transform .1s ease, border-color .12s ease;
+  }
+  .unit-card:active{transform:scale(.98);}
+  .unit-top{display:flex; align-items:center; justify-content:space-between;}
+  .unit-num{font-weight:800; font-size:12px; color:white; padding:3px 10px; border-radius:999px;}
+  .status-chip{font-size:11px; font-weight:800; padding:3px 9px; border-radius:999px; background:#EAF6E4; color:var(--green);}
+  .unit-title{font-weight:700; font-size:16.5px; color:var(--ink); margin:0;}
+  .unit-count{font-size:11.5px; color:var(--ink-soft); margin-top:-4px;}
+  .preview-row{display:flex; gap:6px; flex-wrap:wrap;}
+  .preview-chip{width:34px; height:34px; border-radius:9px; background:#F2F5FA; display:flex; align-items:center; justify-content:center; font-size:17px;}
+  .unit-cta{margin-top:2px; text-align:center; font-weight:800; font-size:13px; padding:10px; border-radius:12px; background:var(--coral); color:white;}
+
+  /* ---------- ASSESSMENT (сетка всех карточек сразу) ---------- */
+  .assess-hint{font-size:12.5px; color:var(--ink-soft); margin:0 0 12px; line-height:1.5;}
+  .assess-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));
+    gap:10px;
+  }
+  .assess-card{
+    background:#F2F5FA;
+    border-radius:14px;
+    padding:10px;
+    border:2px solid transparent;
+    transition:border-color .15s ease, background .15s ease;
+    text-align:center;
+  }
+  .assess-card.mark-yes{background:#EAF6E4; border-color:var(--green);}
+  .assess-card.mark-no{background:#FDEAEF; border-color:var(--red);}
+  .assess-card-top{cursor:pointer; min-height:54px;}
+  .assess-card .a-en{font-weight:800; font-size:15px; color:var(--ink); display:block; line-height:1.25; word-break:break-word;}
+  .assess-card .a-tap-hint{font-size:10px; color:var(--ink-soft); display:block; margin-top:4px;}
+  .assess-card .a-back{display:none; margin-top:6px;}
+  .assess-card .a-back .a-emoji{font-size:26px; display:block; margin-bottom:2px;}
+  .assess-card .a-back .a-tr{font-size:10.5px; color:var(--ink-soft); display:block;}
+  .assess-card .a-back .a-ru{font-size:11.5px; color:var(--coral-dark); font-weight:700; display:block; margin-top:1px;}
+  .assess-card-marks{display:flex; gap:6px; margin-top:8px;}
+  .mark-btn{
+    flex:1; border:none; border-radius:9px; padding:6px 0; font-size:14px; cursor:pointer;
+    background:white; color:var(--ink-soft);
+  }
+  .mark-btn.active-no{background:var(--red); color:white;}
+  .mark-btn.active-yes{background:var(--green); color:white;}
+
+  .sound-btn{
+    width:48px; height:48px; border-radius:50%; background:var(--ink); color:white; border:none;
+    font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow);
+  }
+
+  /* ---------- SUMMARY ---------- */
+  .summary-stat{
+    display:flex; gap:10px; margin-bottom:16px;
+  }
+  .stat-box{
+    flex:1; border-radius:14px; padding:14px; text-align:center;
+  }
+  .stat-box.know{background:#EAF6E4;}
+  .stat-box.dontknow{background:#FDEAEF;}
+  .stat-box b{display:block; font-size:26px; margin-bottom:2px;}
+  .stat-box.know b{color:var(--green);}
+  .stat-box.dontknow b{color:var(--red);}
+  .stat-box span{font-size:12px; color:var(--ink-soft); font-weight:700;}
+  .weak-list{list-style:none; margin:0 0 18px; padding:0; display:flex; flex-direction:column; gap:8px; max-height:220px; overflow:auto;}
+  .weak-item{display:flex; align-items:center; gap:10px; background:#F2F5FA; border-radius:12px; padding:9px 12px;}
+  .weak-item .emoji{font-size:20px;}
+  .weak-item .en{font-weight:800; color:var(--ink); font-size:13.5px;}
+  .weak-item .ru{color:var(--ink-soft); font-size:12.5px;}
+
+  /* ---------- TRAINING MODE PICKER ---------- */
+  .train-modes{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:6px;}
+  .train-mode-btn{
+    background:#F2F5FA; border:2px solid transparent; border-radius:14px; padding:14px 6px; text-align:center;
+    cursor:pointer; transition:transform .1s ease, border-color .12s ease;
+  }
+  .train-mode-btn:active{transform:scale(.96);}
+  .train-mode-btn .emoji{font-size:24px; display:block; margin-bottom:4px;}
+  .train-mode-btn .label{font-weight:800; font-size:11.5px; color:var(--ink);}
+
+  /* ---------- QUIZ ---------- */
+  .quiz-q{text-align:center; margin-bottom:18px;}
+  .quiz-q .big-emoji{font-size:56px; display:block; margin-bottom:6px;}
+  .quiz-q .word-en{font-size:26px; color:var(--ink); font-weight:800;}
+  .quiz-opts{display:grid; gap:10px; flex:1;}
+  .opt-btn{background:#F2F5FA; border:2px solid transparent; border-radius:14px; padding:14px; font-weight:700; font-size:15px; color:var(--ink); cursor:pointer; text-align:left;}
+  .opt-btn.correct{background:var(--green); color:white; border-color:var(--green);}
+  .opt-btn.wrong{background:var(--red); color:white; border-color:var(--red);}
+
+  /* ---------- MATCH ---------- */
+  .match-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .match-card{
+    background:#F2F5FA; border-radius:12px; padding:14px 6px; text-align:center; font-weight:700; font-size:14px; cursor:pointer;
+    min-height:56px; display:flex; align-items:center; justify-content:center; border:2px solid transparent;
+  }
+  .match-card.selected{border-color:var(--coral); background:#E3F2FD;}
+  .match-card.matched{background:var(--green); color:white; opacity:.55; pointer-events:none;}
+
+  /* ---------- SPELL ---------- */
+  .spell-clue{text-align:center; margin-bottom:14px;}
+  .spell-clue .big-emoji{font-size:56px;}
+  .spell-clue .word-ru{font-size:22px; color:var(--coral-dark); font-weight:800;}
+  .spell-slots{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; min-height:52px; align-items:center; margin-bottom:16px; border-bottom:2px dashed #E4E9F0; padding-bottom:12px;}
+  .slot-letter{width:36px; height:44px; background:var(--ink); color:white; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px;}
+  .letter-bank{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:16px;}
+  .letter-tile{width:38px; height:44px; background:#F2F5FA; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; cursor:pointer; border:2px solid #E4E9F0; color:var(--ink);}
+  .letter-tile.used{opacity:.25; pointer-events:none;}
+  .spell-actions{display:flex; gap:10px; margin-top:auto;}
+  .btn{border:none; border-radius:14px; padding:13px 16px; font-weight:800; font-size:14px; cursor:pointer; flex:1;}
+  .btn.primary{background:var(--coral); color:white;}
+  .btn.ghost{background:#F2F5FA; color:var(--ink);}
+
+  /* ---------- DONE ---------- */
+  .end-emoji{font-size:56px; text-align:center; display:block; margin-bottom:8px;}
+  .end-title{font-size:20px; text-align:center; font-weight:800; color:var(--ink); margin-bottom:6px;}
+  .end-sub{font-size:14px; text-align:center; color:var(--ink-soft); margin-bottom:18px;}
+
+  /* ---------- CONTEXT NOTE + CTA ---------- */
+  .context-note{background:#FFF6E0; border:1.5px solid #F2D488; border-radius:16px; padding:16px; margin-top:22px; display:flex; gap:10px; align-items:flex-start;}
+  .context-note-icon{font-size:20px; flex-shrink:0;}
+  .context-note-text{display:flex; flex-direction:column; gap:6px;}
+  .cn-line{margin:0; font-size:13px; line-height:1.5; color:var(--ink);}
+  .cn-punch{margin:6px 0 0; font-size:13.5px; line-height:1.5; color:var(--ink); font-weight:800;}
+  .cta{margin-top:22px; background:var(--ink); color:white; border-radius:20px; padding:20px; text-align:center;}
+  .cta .badge{display:inline-block; background:var(--coral); font-size:11px; font-weight:800; padding:4px 10px; border-radius:99px; margin-bottom:10px;}
+  .cta h3{margin:0 0 8px; font-size:17px; color:white;}
+  .cta p{margin:0 0 14px; font-size:13px; opacity:.9; line-height:1.5;}
+  .cta .price-row{display:flex; justify-content:center; gap:14px; margin-bottom:14px; flex-wrap:wrap;}
+  .cta .price-chip{background:rgba(255,255,255,.12); border-radius:12px; padding:8px 12px; font-size:12px;}
+  .cta .price-chip b{display:block; font-size:15px;}
+  .cta-btn{display:block; width:100%; background:var(--coral); color:white; border:none; border-radius:14px; padding:15px; font-weight:800; font-size:15px; cursor:pointer;}
+  .cta-btn.secondary{background:rgba(255,255,255,.14); margin-top:10px; box-shadow:none;}
+  .footnote{text-align:center; font-size:11px; color:var(--ink-soft); margin-top:14px; line-height:1.6;}
+
+  @media (max-width:380px){
+    .wrap{padding:12px 10px 32px;}
+    .hero h1{font-size:19px;}
+    .flash .word-en{font-size:25px;}
+    .flash .big-emoji{font-size:58px;}
+    .letter-tile,.slot-letter{width:32px; height:40px; font-size:16px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="reminder-banner" id="reminderBanner"></div>
+
+  <div class="brandbar">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 14 L13 4 L18 13" fill="var(--ink)"/><path d="M32 14 L27 4 L22 13" fill="var(--ink)"/><circle cx="20" cy="21" r="15" fill="var(--ink)"/><ellipse cx="14.5" cy="19" rx="1.8" ry="2.4" fill="white"/><ellipse cx="25.5" cy="19" rx="1.8" ry="2.4" fill="white"/><path d="M18.5 25 Q20 27 21.5 25" stroke="white" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M20 23.5 L20 25" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg> LANGUST</div>
+    <div class="unit-badge" id="topBadge">Spotlight · 2 класс</div>
+  </div>
+
+  <!-- ============ SCREEN 1: СПИСОК ЮНИТОВ ============ -->
+  <div class="screen active" id="screen-unitlist">
+    <div class="hero">
+      <h1>Выберите юнит для тренировки</h1>
+      <p>Сначала проверим, какие слова ребёнок уже знает, а какие стоит потренировать отдельно.</p>
+    </div>
+    <div class="grade-tabs">
+      <div class="grade-tab active" data-grade="2" onclick="selectGrade(2)">2 класс</div>
+      <div class="grade-tab" data-grade="3" onclick="selectGrade(3)">3 класс</div>
+      <div class="grade-tab" data-grade="4" onclick="selectGrade(4)">4 класс</div>
+    </div>
+    <div class="unit-list" id="unitList"></div>
+  </div>
+
+  <!-- ============ SCREEN 2: ОЦЕНКА ЗНАЮ / НЕ ЗНАЮ (все слова сразу) ============ -->
+  <div class="screen" id="screen-assess">
+    <div class="panel" style="min-height:auto;">
+      <button class="back-link" onclick="goToUnitList()">‹ К списку юнитов</button>
+      <p class="assess-hint">Нажмите на карточку, чтобы услышать слово и увидеть перевод, затем отметьте ✅ знаю или ❌ не знаю. Неотмеченные слова тоже попадут в список на повторение.</p>
+      <div class="progress-row">
+        <div class="progress-bar"><div class="progress-fill" id="assessProgressFill"></div></div>
+        <div class="progress-count" id="assessProgressCount">Отмечено: 0 / 15</div>
+      </div>
+      <div class="assess-grid" id="assessGrid"></div>
+      <button class="btn primary" style="margin-top:16px;" onclick="showSummary()">Показать результат →</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN 3: РЕЗУЛЬТАТ ОЦЕНКИ ============ -->
+  <div class="screen" id="screen-summary">
+    <div class="panel">
+      <button class="back-link" onclick="goToUnitList()">‹ К списку юнитов</button>
+      <div class="summary-stat">
+        <div class="stat-box know"><b id="sumKnow">0</b><span>знает</span></div>
+        <div class="stat-box dontknow"><b id="sumDontKnow">0</b><span>стоит повторить</span></div>
+      </div>
+      <div id="summaryBody"></div>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN 4: ВЫБОР РЕЖИМА ТРЕНИРОВКИ ============ -->
+  <div class="screen" id="screen-trainpick">
+    <div class="panel">
+      <button class="back-link" onclick="showScreen('screen-summary')">‹ Назад к результату</button>
+      <h3 style="margin:0 0 4px;">Тренажёр-тренировка</h3>
+      <p style="margin:0 0 16px; font-size:13px; color:var(--ink-soft);">Тренируем только те слова, которые ребёнок отметил «не знаю»</p>
+      <div class="train-modes">
+        <div class="train-mode-btn" onclick="startQuiz()"><span class="emoji">🎯</span><span class="label">Слово → перевод</span></div>
+        <div class="train-mode-btn" onclick="startMatch()"><span class="emoji">🧩</span><span class="label">Найди пару</span></div>
+        <div class="train-mode-btn" onclick="startSpell()"><span class="emoji">🔤</span><span class="label">Собери слово</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ QUIZ ============ -->
+  <div class="screen" id="screen-quiz">
+    <div class="panel">
+      <div class="screen-toprow">
+        <button class="back-link" onclick="showScreen('screen-trainpick')">‹ Другой режим</button>
+        <button class="stop-btn" onclick="stopTraining()">⏹ Стоп</button>
+      </div>
+      <div class="progress-row">
+        <div class="progress-bar"><div class="progress-fill" id="quizProgressFill"></div></div>
+        <div class="progress-count" id="quizProgressCount">1 / 10</div>
+      </div>
+      <div class="quiz-q">
+        <span class="big-emoji" id="quizEmoji">📘</span>
+        <span class="word-en" id="quizWordEn">word</span><br>
+        <button class="sound-btn" style="margin-top:8px;" onclick="speakWord(currentQuizWord())">🔊</button>
+      </div>
+      <div class="quiz-opts" id="quizOpts"></div>
+    </div>
+  </div>
+
+  <!-- ============ MATCH ============ -->
+  <div class="screen" id="screen-match">
+    <div class="panel">
+      <div class="screen-toprow">
+        <button class="back-link" onclick="showScreen('screen-trainpick')">‹ Другой режим</button>
+        <button class="stop-btn" onclick="stopTraining()">⏹ Стоп</button>
+      </div>
+      <div class="progress-row">
+        <div class="progress-count" id="matchProgressCount" style="margin:0;">Найдено пар: 0 / 8</div>
+      </div>
+      <div class="match-grid" id="matchGrid"></div>
+    </div>
+  </div>
+
+  <!-- ============ SPELL ============ -->
+  <div class="screen" id="screen-spell">
+    <div class="panel">
+      <div class="screen-toprow">
+        <button class="back-link" onclick="showScreen('screen-trainpick')">‹ Другой режим</button>
+        <button class="stop-btn" onclick="stopTraining()">⏹ Стоп</button>
+      </div>
+      <div class="progress-row">
+        <div class="progress-bar"><div class="progress-fill" id="spellProgressFill"></div></div>
+        <div class="progress-count" id="spellProgressCount">1 / 15</div>
+      </div>
+      <div class="spell-clue">
+        <span class="big-emoji" id="spellEmoji">📘</span><br>
+        <span class="word-ru" id="spellWordRu">перевод</span><br>
+        <button class="sound-btn" style="margin-top:8px;" onclick="speakWord(currentSpellWord())">🔊</button>
+      </div>
+      <div class="spell-slots" id="spellSlots"></div>
+      <div class="letter-bank" id="letterBank"></div>
+      <div class="spell-actions">
+        <button class="btn ghost" onclick="clearSpell()">Стереть</button>
+        <button class="btn primary" onclick="checkSpell()">Проверить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DONE ============ -->
+  <div class="screen" id="screen-done">
+    <div class="panel">
+      <span class="end-emoji" id="doneEmoji">🎉</span>
+      <div class="end-title" id="doneTitle">Готово!</div>
+      <div class="end-sub" id="doneSub">Отличная работа</div>
+      <button class="btn primary" onclick="showScreen('screen-trainpick')">Тренировать ещё раз</button>
+      <div style="height:8px;"></div>
+      <button class="btn ghost" onclick="goToUnitList()">Выбрать другой юнит</button>
+
+      <div class="context-note">
+        <span class="context-note-icon">💡</span>
+        <div class="context-note-text">
+          <p class="cn-line">15 слов. 20. Сто. Число ничего не решает.</p>
+          <p class="cn-line">Выучить список — не то же самое, что заговорить.</p>
+          <p class="cn-line">Слово без контекста живёт до ближайшей проверки. Потом забывается.</p>
+          <p class="cn-line">Держится в памяти только то, что встречается снова: в разных упражнениях, на разных уроках.</p>
+          <p class="cn-punch">Курс пройден, а ребёнок молчит? Проверьте подход. Не количество повторений.</p>
+        </div>
+      </div>
+
+      <div class="cta">
+        <span class="badge">ДО 1 СЕНТЯБРЯ ОСТАЛОСЬ НЕМНОГО</span>
+        <h3>Это только один юнит из восьми</h3>
+        <p>В полном тренажёре — все юниты Spotlight 2, 3 и 4 класса в контексте: аудио к каждому слову, разбор сложных мест учебника и упражнения на говорение.</p>
+        <div class="price-row">
+          <div class="price-chip">Помесячно<br><b>2 400 ₽</b></div>
+          <div class="price-chip">На год<br><b>14 500 ₽</b></div>
+        </div>
+        <button class="cta-btn" onclick="alert('Здесь будет ссылка на оформление пробного периода')">Попробовать 3 дня бесплатно</button>
+        <button class="cta-btn secondary" onclick="alert('Здесь будет ссылка на оплату / переход в директ')">Оформить полный доступ сразу</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">LANGUST · тренажёр по учебникам Spotlight · Татьяна Скробова</div>
+</div>
+
+<script>
+/* ================= DATA: СЛОВАРЬ ПО КЛАССАМ ================= */
+const GRADE_DATA = {
+2: {
+  1: { title:"Моя семья и цвета", band:"#F4A15B", words:[
+    {en:"family", ru:"семья", tr:"[ˡfæmɪlɪ]", emoji:"👨‍👩‍👧‍👦"},
+    {en:"mummy", ru:"мама", tr:"[ˡmʌmɪ]", emoji:"👩"},
+    {en:"daddy", ru:"папа", tr:"[ˡdædɪ]", emoji:"👨"},
+    {en:"grandma", ru:"бабушка", tr:"[ˡɡrændma:]", emoji:"👵"},
+    {en:"grandpa", ru:"дедушка", tr:"[ˡɡrændpa:]", emoji:"👴"},
+    {en:"brother", ru:"брат", tr:"[ˡbrʌðə]", emoji:"👦"},
+    {en:"sister", ru:"сестра", tr:"[ˡsɪstə]", emoji:"👧"},
+    {en:"colour", ru:"цвет", tr:"[ˡkʌlə]", emoji:"🎨"},
+    {en:"white", ru:"белый", tr:"[waɪt]", emoji:"⚪"},
+    {en:"red", ru:"красный", tr:"[rеd]", emoji:"🔴"},
+    {en:"blue", ru:"голубой, синий", tr:"[blu:]", emoji:"🔵"},
+    {en:"yellow", ru:"жёлтый", tr:"[ˡjеləʊ]", emoji:"🟡"},
+    {en:"green", ru:"зелёный", tr:"[ɡri:n]", emoji:"🟢"},
+    {en:"black", ru:"чёрный", tr:"[blæk]", emoji:"⚫"},
+    {en:"brown", ru:"коричневый", tr:"[braʊn]", emoji:"🟤"}
+  ]},
+  2: { title:"Мой дом", band:"#F48FB1", words:[
+    {en:"home", ru:"дом", tr:"[həʊm]", emoji:"🏠"},
+    {en:"garden", ru:"сад", tr:"[ɡa:dn]", emoji:"🌳"},
+    {en:"house", ru:"дом (здание)", tr:"[haʊs]", emoji:"🏡"},
+    {en:"bath", ru:"ванна", tr:"[ba:θ]", emoji:"🛁"},
+    {en:"bathroom", ru:"ванная комната", tr:"[ba:θrʊm]", emoji:"🚿"},
+    {en:"living room", ru:"гостиная", tr:"['lɪvɪŋ rʊm]", emoji:"🛋️"},
+    {en:"bedroom", ru:"спальня", tr:"[bedru:m]", emoji:"🛌"},
+    {en:"kitchen", ru:"кухня", tr:"[ˡkɪʧɪn]", emoji:"🍳"},
+    {en:"table", ru:"стол", tr:"[teɪbl]", emoji:"🍽️"},
+    {en:"chair", ru:"стул", tr:"[ʧeə]", emoji:"🪑"},
+    {en:"tree house", ru:"дом на дереве", tr:"[ˡtri: haʊs]", emoji:"🌲"},
+    {en:"bed", ru:"кровать", tr:"[bed]", emoji:"🛏️"},
+    {en:"radio", ru:"радио", tr:"[ˡreɪdɪəʊ]", emoji:"📻"}
+  ]},
+  3: { title:"Мой день рождения", band:"#3FA9F5", words:[
+    {en:"birthday", ru:"день рождения", tr:"[ˡbɜ:θdeɪ]", emoji:"🎂"},
+    {en:"happy", ru:"счастливый", tr:"[ˡhæpɪ]", emoji:"😊"},
+    {en:"sad", ru:"печальный, грустный", tr:"[sæd]", emoji:"😢"},
+    {en:"one", ru:"один", tr:"[wʌn]", emoji:"1️⃣"},
+    {en:"two", ru:"два", tr:"[tu:]", emoji:"2️⃣"},
+    {en:"three", ru:"три", tr:"[θri:]", emoji:"3️⃣"},
+    {en:"four", ru:"четыре", tr:"[fɔ:]", emoji:"4️⃣"},
+    {en:"five", ru:"пять", tr:"[faɪv]", emoji:"5️⃣"},
+    {en:"six", ru:"шесть", tr:"[sɪks]", emoji:"6️⃣"},
+    {en:"seven", ru:"семь", tr:"[sevn]", emoji:"7️⃣"},
+    {en:"eight", ru:"восемь", tr:"[eɪt]", emoji:"8️⃣"},
+    {en:"nine", ru:"девять", tr:"[naɪn]", emoji:"9️⃣"},
+    {en:"ten", ru:"десять", tr:"[ten]", emoji:"🔟"}
+  ]},
+  4: { title:"Моя любимая еда", band:"#3FA9F5", words:[
+    {en:"chocolate", ru:"шоколад", tr:"[ʧoklɪt]", emoji:"🍫"},
+    {en:"favourite", ru:"любимый", tr:"[ˡfeɪvərɪt]", emoji:"⭐"},
+    {en:"food", ru:"еда", tr:"[fu:d]", emoji:"🍽️"},
+    {en:"burger", ru:"гамбургер", tr:"[bɜ:ɡə]", emoji:"🍔"},
+    {en:"chips", ru:"чипсы", tr:"[ʧɪps]", emoji:"🍟"},
+    {en:"apple", ru:"яблоко", tr:"[æpl]", emoji:"🍎"},
+    {en:"banana", ru:"банан", tr:"[bəˡna:nə]", emoji:"🍌"},
+    {en:"sandwich", ru:"бутерброд", tr:"[ˡsændwɪʧ]", emoji:"🥪"},
+    {en:"biscuits", ru:"печеньки", tr:"[ˡbɪskɪts]", emoji:"🍪"},
+    {en:"sausage", ru:"сосиска, колбаса", tr:"[ˡsɔsɪʤ]", emoji:"🌭"},
+    {en:"ice-cream", ru:"мороженое", tr:"[ˡaɪskri:m]", emoji:"🍦"},
+    {en:"pizza", ru:"пицца", tr:"[ˡpɪtsə]", emoji:"🍕"},
+    {en:"milk", ru:"молоко", tr:"[mɪlk]", emoji:"🥛"},
+    {en:"orange juice", ru:"апельсиновый сок", tr:"[ˡorɪnʤ ʤu:s]", emoji:"🧃"},
+    {en:"chocolate cake", ru:"шоколадный торт", tr:"[ˡʧoklɪt keɪk]", emoji:"🍰"}
+  ]},
+  5: { title:"Мои животные", band:"#5AA82E", words:[
+    {en:"animal", ru:"животное", tr:"[ˡænɪməl]", emoji:"🐾"},
+    {en:"fish", ru:"рыба", tr:"[fɪʃ]", emoji:"🐟"},
+    {en:"bird", ru:"птица", tr:"[bɜ:d]", emoji:"🐦"},
+    {en:"horse", ru:"лошадь", tr:"[hɔ:s]", emoji:"🐴"},
+    {en:"frog", ru:"лягушка", tr:"[froɡ]", emoji:"🐸"},
+    {en:"chimp", ru:"шимпанзе", tr:"[ʧɪmp]", emoji:"🐵"},
+    {en:"swim", ru:"плавать", tr:"[swɪm]", emoji:"🏊"},
+    {en:"sing", ru:"петь", tr:"[sɪŋ]", emoji:"🎤"},
+    {en:"run", ru:"бежать", tr:"[rʌn]", emoji:"🏃"},
+    {en:"jump", ru:"прыгать", tr:"[ʤʌmp]", emoji:"🤸"},
+    {en:"dance", ru:"танцевать", tr:"[da:ns]", emoji:"💃"},
+    {en:"fly", ru:"летать", tr:"[flaɪ]", emoji:"🦅"},
+    {en:"climb", ru:"карабкаться, взбираться", tr:"[klaɪm]", emoji:"🧗"},
+    {en:"can", ru:"мочь, уметь", tr:"[kæn]", emoji:"💪"},
+    {en:"girl", ru:"девочка", tr:"[ɡɜ:l]", emoji:"👧"},
+    {en:"boy", ru:"мальчик", tr:"[bɔɪ]", emoji:"👦"}
+  ]},
+  6: { title:"Мои игрушки", band:"#5AA82E", words:[
+    {en:"toys", ru:"игрушки", tr:"[tоɪz]", emoji:"🧸"},
+    {en:"teddy bear", ru:"плюшевый мишка", tr:"[ˡtеdɪ bеə]", emoji:"🐻"},
+    {en:"ballerina", ru:"балерина", tr:"[bæləˡri:nə]", emoji:"🩰"},
+    {en:"toy soldier", ru:"игрушечный солдатик", tr:"[ˡtоɪ souldӡǝ]", emoji:"💂"},
+    {en:"shelf", ru:"полка", tr:"[ʃеlf]", emoji:"🗄️"},
+    {en:"toy box", ru:"коробка для игрушек", tr:"[ˡtoɪ bоks]", emoji:"📦"},
+    {en:"pink", ru:"розовый", tr:"[pɪnk]", emoji:"🌸"},
+    {en:"in", ru:"в", tr:"[ɪn]", emoji:"📥"},
+    {en:"on", ru:"на", tr:"[оn]", emoji:"📤"},
+    {en:"under", ru:"под", tr:"[ʌndə]", emoji:"⬇️"},
+    {en:"nose", ru:"нос", tr:"[nəʊz]", emoji:"👃"},
+    {en:"eye", ru:"глаз", tr:"[aɪ]", emoji:"👁️"},
+    {en:"ear", ru:"ухо", tr:"[ɪə]", emoji:"👂"},
+    {en:"hair", ru:"волосы", tr:"[hеə]", emoji:"💇"},
+    {en:"dark", ru:"тёмный (о волосах)", tr:"[da:k]", emoji:"🌑"},
+    {en:"mouth", ru:"рот", tr:"[maʊθ]", emoji:"👄"},
+    {en:"fair", ru:"светлый (о волосах)", tr:"[fеə]", emoji:"☀️"},
+    {en:"big", ru:"большой", tr:"[bɪɡ]", emoji:"🦣"},
+    {en:"small", ru:"маленький", tr:"[smɔ:l]", emoji:"🐁"},
+    {en:"puppet", ru:"марионетка", tr:"[ˡpʌpɪt]", emoji:"🎭"},
+    {en:"jack-in-the-box", ru:"джек-в-коробке", tr:"[ʹʤækɪnðəbоks]", emoji:"🎁"}
+  ]},
+  7: { title:"Мои каникулы", band:"#8A6FC9", words:[
+    {en:"It's sunny!", ru:"Солнечно!", tr:"[ɪts ˡsʌnɪ]", emoji:"☀️"},
+    {en:"It's hot!", ru:"Жарко!", tr:"[ɪts hоt]", emoji:"🥵"},
+    {en:"It's raining!", ru:"Идёт дождь!", tr:"[ɪts ˡreɪnɪŋ]", emoji:"🌧️"},
+    {en:"It's windy!", ru:"Ветрено!", tr:"[ɪts ˡwɪndɪ]", emoji:"💨"},
+    {en:"It's cold!", ru:"Холодно!", tr:"[ɪts kəʊld]", emoji:"❄️"},
+    {en:"take off", ru:"снимать (об одежде)", tr:"[teɪk оf]", emoji:"⬇️"},
+    {en:"put on", ru:"одевать (об одежде)", tr:"[pʊt оn]", emoji:"⬆️"},
+    {en:"jacket", ru:"куртка", tr:"[ˡʤækɪt]", emoji:"🧥"},
+    {en:"coat", ru:"пальто", tr:"[ˡkəʊt]", emoji:"🧥"},
+    {en:"hat", ru:"шляпа", tr:"[hæt]", emoji:"🎩"},
+    {en:"shorts", ru:"шорты", tr:"[ʃɔ:ts]", emoji:"🩳"},
+    {en:"sock", ru:"носок", tr:"[sоk]", emoji:"🧦"},
+    {en:"T-shirt", ru:"футболка", tr:"[ˡti:ʃɜ:t]", emoji:"👕"},
+    {en:"jeans", ru:"джинсы", tr:"[ʤi:nz]", emoji:"👖"},
+    {en:"shoes", ru:"туфли", tr:"[ʃu:z]", emoji:"👞"},
+    {en:"skirt", ru:"юбка", tr:"[skɜ:t]", emoji:"👗"}
+  ]},
+  8: { title:"Времена года", band:"#8A6FC9", words:[
+    {en:"winter", ru:"зима", tr:"[ˡwɪntə]", emoji:"❄️"},
+    {en:"summer", ru:"лето", tr:"[ˡsʌmə]", emoji:"☀️"},
+    {en:"spring", ru:"весна", tr:"[sprɪŋ]", emoji:"🌸"},
+    {en:"autumn", ru:"осень", tr:"[ˡɔ:təm]", emoji:"🍂"}
+  ]}
+}, // конец 2 класса
+
+3: {
+  1: { title:"Цвета, числа 1–10 и школьные вещи", band:"#F4A15B", words:[
+    {en:"yellow", ru:"жёлтый", tr:"[ˈjɛlǝʊ]", emoji:"🟡"},
+    {en:"black", ru:"чёрный", tr:"[blӕk]", emoji:"⚫"},
+    {en:"white", ru:"белый", tr:"[waɪt]", emoji:"⚪"},
+    {en:"blue", ru:"голубой", tr:"[blu:]", emoji:"🔵"},
+    {en:"red", ru:"красный", tr:"[red]", emoji:"🔴"},
+    {en:"grey", ru:"серый", tr:"[ɡreɪ]", emoji:"⬜"},
+    {en:"orange", ru:"оранжевый", tr:"[ˈɒrɪndӡ]", emoji:"🟠"},
+    {en:"pink", ru:"розовый", tr:"[pɪnk]", emoji:"🌸"},
+    {en:"brown", ru:"коричневый", tr:"[braʊn]", emoji:"🟤"},
+    {en:"green", ru:"зелёный", tr:"[ɡrɪ:n]", emoji:"🟢"},
+    {en:"pen", ru:"ручка", tr:"[pɛn]", emoji:"🖊️"},
+    {en:"pencil", ru:"карандаш", tr:"[ˈpɛnsɪl]", emoji:"✏️"},
+    {en:"pencil-case", ru:"пенал", tr:"[ˈpɛnsɪl keɪs]", emoji:"🖍️"},
+    {en:"ruler", ru:"линейка", tr:"[ˈru:lǝ]", emoji:"📏"},
+    {en:"rubber", ru:"резинка", tr:"[ˈrᴧbǝ]", emoji:"🧽"},
+    {en:"book", ru:"книга", tr:"[bʊk]", emoji:"📕"},
+    {en:"school bag", ru:"школьная сумка", tr:"[sku:l bӕɡ]", emoji:"🎒"},
+    {en:"felt-tip-pen", ru:"фломастер", tr:"[fɛlt tɪp pen]", emoji:"🖌️"},
+    {en:"one", ru:"один", tr:"[wᴧn]", emoji:"1️⃣"},
+    {en:"two", ru:"два", tr:"[tu:]", emoji:"2️⃣"},
+    {en:"three", ru:"три", tr:"[θri:]", emoji:"3️⃣"},
+    {en:"four", ru:"четыре", tr:"[fɔ:]", emoji:"4️⃣"},
+    {en:"five", ru:"пять", tr:"[faɪv]", emoji:"5️⃣"},
+    {en:"six", ru:"шесть", tr:"[sɪks]", emoji:"6️⃣"},
+    {en:"seven", ru:"семь", tr:"[ˈsɛvǝn]", emoji:"7️⃣"},
+    {en:"eight", ru:"восемь", tr:"[eɪt]", emoji:"8️⃣"},
+    {en:"nine", ru:"девять", tr:"[naɪn]", emoji:"9️⃣"},
+    {en:"ten", ru:"десять", tr:"[tɛn]", emoji:"🔟"}
+  ]},
+  2: { title:"Числа 11–20, предметы и фигуры", band:"#F48FB1", words:[
+    {en:"eleven", ru:"одиннадцать", tr:"[ɪˈlɛvǝn]", emoji:"1️⃣1️⃣"},
+    {en:"twelve", ru:"двенадцать", tr:"[twɛlv]", emoji:"1️⃣2️⃣"},
+    {en:"thirteen", ru:"тринадцать", tr:"[θз:ˈti:n]", emoji:"1️⃣3️⃣"},
+    {en:"fourteen", ru:"четырнадцать", tr:"[fɔ:ˈti:n]", emoji:"1️⃣4️⃣"},
+    {en:"fifteen", ru:"пятнадцать", tr:"[fɪfˈti:n]", emoji:"1️⃣5️⃣"},
+    {en:"sixteen", ru:"шестнадцать", tr:"[sɪksˈti:n]", emoji:"1️⃣6️⃣"},
+    {en:"seventeen", ru:"семнадцать", tr:"[sɛvǝnˈti:n]", emoji:"1️⃣7️⃣"},
+    {en:"eighteen", ru:"восемнадцать", tr:"[eɪˈti:n]", emoji:"1️⃣8️⃣"},
+    {en:"nineteen", ru:"девятнадцать", tr:"[naɪnˈti:n]", emoji:"1️⃣9️⃣"},
+    {en:"twenty", ru:"двадцать", tr:"[ˈtwɛntɪ]", emoji:"2️⃣0️⃣"},
+    {en:"English", ru:"английский", tr:"[ˈɪŋɡlɪʃ]", emoji:"🇬🇧"},
+    {en:"Maths", ru:"математика", tr:"[mæθs]", emoji:"➗"},
+    {en:"Geography", ru:"география", tr:"[dӡɪˈɒɡrǝfɪ]", emoji:"🌍"},
+    {en:"PE", ru:"физкультура", tr:"[pi: i:]", emoji:"⚽"},
+    {en:"History", ru:"история", tr:"[ˈhɪstǝrɪ]", emoji:"📜"},
+    {en:"Science", ru:"наука", tr:"[ˈsaɪǝns]", emoji:"🔬"},
+    {en:"Art", ru:"искусство (ИЗО)", tr:"[a:t]", emoji:"🎨"},
+    {en:"Music", ru:"музыка", tr:"[ˈmju:zɪk]", emoji:"🎵"},
+    {en:"stand up", ru:"встаньте", tr:"[ˈstӕnd ᴧp]", emoji:"🧍"},
+    {en:"sit down", ru:"сядьте", tr:"[ˈsɪt daʊn]", emoji:"🪑"},
+    {en:"open your book", ru:"откройте книгу", tr:"[ˈǝʊpǝn jɔ: bʊk]", emoji:"📖"},
+    {en:"close your book", ru:"закройте книгу", tr:"[ˈklǝʊz jɔ: bʊk]", emoji:"📕"},
+    {en:"clap your hands", ru:"похлопайте", tr:"[ˈklæp jɔ: hændz]", emoji:"👏"},
+    {en:"stamp your feet", ru:"потопайте", tr:"[ˈstæmp jɔ: fi:t]", emoji:"🦶"},
+    {en:"circle", ru:"круг", tr:"[sɜ:kl]", emoji:"⭕"},
+    {en:"square", ru:"квадрат", tr:"[ˈskwɛǝ]", emoji:"🟥"},
+    {en:"triangle", ru:"треугольник", tr:"[traɪˈæŋɡl]", emoji:"🔺"},
+    {en:"oval", ru:"овал", tr:"[ˈǝʊvǝl]", emoji:"🥚"},
+    {en:"star", ru:"звезда", tr:"[sta:]", emoji:"⭐"}
+  ]},
+  3: { title:"Школа и новый член семьи", band:"#3FA9F5", words:[
+    {en:"Nursery school", ru:"детский сад", tr:"[ˈnɜ:sǝrɪ sku:l]", emoji:"🧸"},
+    {en:"Primary school", ru:"начальная школа", tr:"[ˈpraɪmǝrɪ sku:l]", emoji:"🏫"},
+    {en:"age", ru:"возраст", tr:"[eɪdӡ]", emoji:"🎂"},
+    {en:"start", ru:"начинать", tr:"[sta:t]", emoji:"🚀"},
+    {en:"spend", ru:"проводить, тратить", tr:"[spɛnd]", emoji:"⏳"},
+    {en:"uniform", ru:"форма", tr:"[ˈju:nɪfɔ:m]", emoji:"👔"},
+    {en:"classroom", ru:"классная комната", tr:"[ˈkla:sru:m]", emoji:"🏫"},
+    {en:"computer", ru:"компьютер", tr:"[kǝmˈpju:tǝ]", emoji:"💻"},
+    {en:"canteen", ru:"столовая", tr:"[kænˈti:n]", emoji:"🍽️"},
+    {en:"library", ru:"библиотека", tr:"[ˈlaɪbrǝrɪ]", emoji:"📚"},
+    {en:"gym", ru:"спортивный зал", tr:"[dӡɪm]", emoji:"🏋️"},
+    {en:"grandma", ru:"бабушка", tr:"[ˈɡrændma:]", emoji:"👵"},
+    {en:"grandpa", ru:"дедушка", tr:"[ˈɡrændpa:]", emoji:"👴"},
+    {en:"mum", ru:"мама", tr:"[mᴧm]", emoji:"👩"},
+    {en:"dad", ru:"папа", tr:"[dæd]", emoji:"👨"},
+    {en:"big brother", ru:"старший брат", tr:"[bɪɡ ˈbrᴧðǝ]", emoji:"👦"},
+    {en:"little sister", ru:"младшая сестра", tr:"[lɪtl ˈsɪstǝ]", emoji:"👧"},
+    {en:"my", ru:"мой", tr:"[maɪ]", emoji:"🙋"},
+    {en:"his", ru:"его", tr:"[hɪz]", emoji:"🙋‍♂️"},
+    {en:"her", ru:"её", tr:"[hɜ:]", emoji:"🙋‍♀️"},
+    {en:"its", ru:"его / её (о предмете)", tr:"[ɪts]", emoji:"📦"},
+    {en:"your", ru:"твой, ваш", tr:"[jɔ:]", emoji:"👉"},
+    {en:"our", ru:"наш", tr:"[aʊǝ]", emoji:"👨‍👩‍👧"},
+    {en:"their", ru:"их", tr:"[ðeǝ]", emoji:"👨‍👩‍👧‍👦"}
+  ]},
+  4: { title:"Семья и еда", band:"#3FA9F5", words:[
+    {en:"mother", ru:"мама", tr:"[ˈmᴧðǝ]", emoji:"👩"},
+    {en:"father", ru:"папа", tr:"[ˈfa:ðǝ]", emoji:"👨"},
+    {en:"grandmother", ru:"бабушка", tr:"[ˈɡrændˈmᴧðǝ]", emoji:"👵"},
+    {en:"grandfather", ru:"дедушка", tr:"[ˈɡrændˈfa:ðǝ]", emoji:"👴"},
+    {en:"chicken", ru:"курица", tr:"[ˈtʃɪkɪn]", emoji:"🍗"},
+    {en:"burgers", ru:"гамбургеры", tr:"[ˈbɜ:ɡǝz]", emoji:"🍔"},
+    {en:"pizza", ru:"пицца", tr:"[ˈpɪ:tsǝ]", emoji:"🍕"},
+    {en:"chocolate", ru:"шоколад", tr:"[ˈtʃɒklǝt]", emoji:"🍫"},
+    {en:"water", ru:"вода", tr:"[ˈwɔ:tǝ]", emoji:"💧"},
+    {en:"vegetables", ru:"овощи", tr:"[ˈvɛdӡɪtǝbǝlz]", emoji:"🥦"},
+    {en:"lemonade", ru:"лимонад", tr:"[ˈlɛmǝneɪd]", emoji:"🥤"},
+    {en:"eggs", ru:"яйца", tr:"[ɛɡz]", emoji:"🥚"},
+    {en:"sandwich", ru:"бутерброд", tr:"[ˈsændwɪtʃ]", emoji:"🥪"},
+    {en:"chips", ru:"чипсы", tr:"[tʃɪps]", emoji:"🍟"},
+    {en:"meat", ru:"мясо", tr:"[mi:t]", emoji:"🥩"},
+    {en:"potato", ru:"картошка", tr:"[pǝˈteɪtǝʊ]", emoji:"🥔"},
+    {en:"biscuit", ru:"печенье", tr:"[ˈbɪskɪt]", emoji:"🍪"},
+    {en:"milk", ru:"молоко", tr:"[mɪlk]", emoji:"🥛"},
+    {en:"cake", ru:"торт, пирожное", tr:"[keɪk]", emoji:"🍰"},
+    {en:"juice", ru:"сок", tr:"[dӡu:s]", emoji:"🧃"},
+    {en:"pasta", ru:"макароны", tr:"[ˈpa:stǝ]", emoji:"🍝"},
+    {en:"carrot", ru:"морковка", tr:"[ˈkærǝt]", emoji:"🥕"},
+    {en:"sausage", ru:"сосиска", tr:"[ˈsɔ:sɪdӡ]", emoji:"🌭"},
+    {en:"rice", ru:"рис", tr:"[raɪs]", emoji:"🍚"},
+    {en:"popcorn", ru:"попкорн", tr:"[pɒpˈkɔ:n]", emoji:"🍿"},
+    {en:"Coke", ru:"кока-кола", tr:"[kǝʊk]", emoji:"🥤"},
+    {en:"fish", ru:"рыба", tr:"[fɪʃ]", emoji:"🐟"},
+    {en:"ice cream", ru:"мороженое", tr:"[ˈaɪskri:m]", emoji:"🍦"}
+  ]},
+  5: { title:"Игрушки, комната и коровы", band:"#5AA82E", words:[
+    {en:"musical box", ru:"музыкальная шкатулка", tr:"[ˈmju:zɪkǝl bɒks]", emoji:"🎁"},
+    {en:"doll", ru:"кукла", tr:"[dɒl]", emoji:"🪆"},
+    {en:"tea set", ru:"чайный набор", tr:"[ti: sɛt]", emoji:"🫖"},
+    {en:"elephant", ru:"слон", tr:"[ˈelɛfǝnt]", emoji:"🐘"},
+    {en:"rocking horse", ru:"лошадка-качалка", tr:"[ˈrɒkɪŋ ˈhɔ:s]", emoji:"🐴"},
+    {en:"aeroplane", ru:"самолётик", tr:"[ˈɛǝrǝpleɪn]", emoji:"✈️"},
+    {en:"train", ru:"поезд", tr:"[treɪn]", emoji:"🚂"},
+    {en:"ball", ru:"мячик", tr:"[bɔ:l]", emoji:"⚽"},
+    {en:"computer", ru:"компьютер", tr:"[kǝmˈpju:tǝ]", emoji:"💻"},
+    {en:"TV", ru:"телевизор", tr:"[ˈti:ˈvi:]", emoji:"📺"},
+    {en:"radio", ru:"радио", tr:"[ˈreɪdɪǝʊ]", emoji:"📻"},
+    {en:"armchair", ru:"кресло", tr:"[ˈa:mtʃeǝ]", emoji:"🛋️"},
+    {en:"lamp", ru:"лампа", tr:"[læmp]", emoji:"💡"},
+    {en:"bed", ru:"кровать", tr:"[bɛd]", emoji:"🛏️"},
+    {en:"desk", ru:"парта, стол", tr:"[dɛsk]", emoji:"🪑"},
+    {en:"chair", ru:"стул", tr:"[tʃeǝ]", emoji:"🪑"},
+    {en:"small nose", ru:"маленький нос", tr:"[smɔ:l nǝʊz]", emoji:"👃"},
+    {en:"big ears", ru:"большие уши", tr:"[bɪɡ ɪǝz]", emoji:"👂"},
+    {en:"small head", ru:"маленькая голова", tr:"[smɔ:l hɛd]", emoji:"🗣️"},
+    {en:"big eyes", ru:"большие глаза", tr:"[bɪɡ aɪz]", emoji:"👀"},
+    {en:"thin legs", ru:"тоненькие ножки", tr:"[θɪn lɛɡz]", emoji:"🦵"},
+    {en:"fat body", ru:"толстое тело", tr:"[fæt ˈbᴧdɪ]", emoji:"🐄"},
+    {en:"short tail", ru:"короткий хвост", tr:"[ʃɔ:t teɪl]", emoji:"🐇"},
+    {en:"long tail", ru:"длинный хвост", tr:"[lɒŋ teɪl]", emoji:"🐀"}
+  ]},
+  6: { title:"Умные животные и круглые числа", band:"#5AA82E", words:[
+    {en:"crawl", ru:"ползать", tr:"[krɔ:l]", emoji:"🐛"},
+    {en:"fly", ru:"летать", tr:"[flaɪ]", emoji:"🦅"},
+    {en:"jump", ru:"прыгать", tr:"[dӡᴧmp]", emoji:"🤸"},
+    {en:"swim", ru:"плавать", tr:"[swɪm]", emoji:"🏊"},
+    {en:"walk", ru:"гулять, ходить", tr:"[wɔ:k]", emoji:"🚶"},
+    {en:"talk", ru:"говорить", tr:"[tɔ:k]", emoji:"💬"},
+    {en:"spider", ru:"паук", tr:"[ˈspaɪdǝ]", emoji:"🕷️"},
+    {en:"bird", ru:"птица", tr:"[bɜ:d]", emoji:"🐦"},
+    {en:"rabbit", ru:"кролик", tr:"[ˈræbɪt]", emoji:"🐇"},
+    {en:"seahorse", ru:"морской конёк", tr:"[ˈsi:ˈhɔ:s]", emoji:"🐠"},
+    {en:"tortoise", ru:"черепаха", tr:"[ˈtɔ:tǝs]", emoji:"🐢"},
+    {en:"parrot", ru:"попугай", tr:"[ˈpærǝt]", emoji:"🦜"},
+    {en:"ten", ru:"десять", tr:"[tɛn]", emoji:"🔟"},
+    {en:"twenty", ru:"двадцать", tr:"[ˈtwɛntɪ]", emoji:"2️⃣0️⃣"},
+    {en:"thirty", ru:"тридцать", tr:"[ˈθɜ:tɪ]", emoji:"3️⃣0️⃣"},
+    {en:"forty", ru:"сорок", tr:"[ˈfɔ:tɪ]", emoji:"4️⃣0️⃣"},
+    {en:"fifty", ru:"пятьдесят", tr:"[ˈfɪftɪ]", emoji:"5️⃣0️⃣"},
+    {en:"sixty", ru:"шестьдесят", tr:"[ˈsɪkstɪ]", emoji:"6️⃣0️⃣"},
+    {en:"seventy", ru:"семьдесят", tr:"[ˈsɛvǝntɪ]", emoji:"7️⃣0️⃣"},
+    {en:"eighty", ru:"восемьдесят", tr:"[ˈeɪtɪ]", emoji:"8️⃣0️⃣"},
+    {en:"ninety", ru:"девяносто", tr:"[ˈnaɪntɪ]", emoji:"9️⃣0️⃣"},
+    {en:"one hundred", ru:"сто", tr:"[wᴧn ˈhᴧndrɪd]", emoji:"💯"}
+  ]},
+  7: { title:"Дом, предлоги и выходной", band:"#8A6FC9", words:[
+    {en:"house", ru:"дом", tr:"[ˈhaʊs]", emoji:"🏠"},
+    {en:"bedroom", ru:"спальня", tr:"[ˈbɛdru:m]", emoji:"🛏️"},
+    {en:"bathroom", ru:"ванная", tr:"[ˈba:θru:m]", emoji:"🚿"},
+    {en:"kitchen", ru:"кухня", tr:"[ˈkɪtʃɪn]", emoji:"🍳"},
+    {en:"living room", ru:"гостиная", tr:"[ˈlɪvɪŋ ru:m]", emoji:"🛋️"},
+    {en:"garden", ru:"сад", tr:"[ɡa:dn]", emoji:"🌳"},
+    {en:"cupboard", ru:"буфет", tr:"[ˈkᴧbǝd]", emoji:"🗄️"},
+    {en:"mirror", ru:"зеркало", tr:"[ˈmɪrǝ]", emoji:"🪞"},
+    {en:"fridge", ru:"холодильник", tr:"[frɪdӡ]", emoji:"🧊"},
+    {en:"sofa", ru:"диван", tr:"[ˈsǝʊfǝ]", emoji:"🛋️"},
+    {en:"cooker", ru:"плита", tr:"[ˈkʊkǝ]", emoji:"🍳"},
+    {en:"glass", ru:"стакан", tr:"[ɡla:s]", emoji:"🥛"},
+    {en:"box", ru:"коробка", tr:"[bɒks]", emoji:"📦"},
+    {en:"dish", ru:"тарелка", tr:"[dɪʃ]", emoji:"🍽️"},
+    {en:"shelf", ru:"полка", tr:"[ʃɛlf]", emoji:"🗄️"},
+    {en:"on", ru:"на", tr:"[ɒn]", emoji:"📤"},
+    {en:"in", ru:"в", tr:"[ɪn]", emoji:"📥"},
+    {en:"under", ru:"под", tr:"[ˈᴧndǝ]", emoji:"⬇️"},
+    {en:"next to", ru:"рядом с", tr:"[nɛkst tʊ]", emoji:"↔️"},
+    {en:"in front of", ru:"перед", tr:"[ɪn frᴧnt ɒv]", emoji:"⏭️"},
+    {en:"behind", ru:"позади", tr:"[bɪˈhaɪnd]", emoji:"⏮️"},
+    {en:"to play a game", ru:"играть в игру", tr:"[tʊ pleɪ ǝ ɡeɪm]", emoji:"🎮"},
+    {en:"to drive a car", ru:"водить машину", tr:"[tʊ draɪv ǝ ka:]", emoji:"🚗"},
+    {en:"to make a sandcastle", ru:"строить замок из песка", tr:"[tʊ meɪk ǝ ˈsændka:sl]", emoji:"🏖️"},
+    {en:"to watch TV", ru:"смотреть телевизор", tr:"[tʊ wɒtʃ ti: vi:]", emoji:"📺"},
+    {en:"to paint a picture", ru:"рисовать картину", tr:"[tʊ peɪnt ǝ ˈpɪktʃǝ]", emoji:"🎨"}
+  ]},
+  8: { title:"Парк и дни недели", band:"#8A6FC9", words:[
+    {en:"to play soccer", ru:"играть в футбол", tr:"[tʊ pleɪ ˈsɒkǝ]", emoji:"⚽"},
+    {en:"to eat a hot dog", ru:"есть хот-дог", tr:"[tʊ i:t ǝ hɒt dɒɡ]", emoji:"🌭"},
+    {en:"to play basketball", ru:"играть в баскетбол", tr:"[tʊ pleɪ ˈba:skɪtbɔ:l]", emoji:"🏀"},
+    {en:"to fly a kite", ru:"запускать змея", tr:"[tʊ flaɪ ǝ kaɪt]", emoji:"🪁"},
+    {en:"to ride a bike", ru:"кататься на велосипеде", tr:"[tʊ raɪd ǝ baɪk]", emoji:"🚲"},
+    {en:"to sleep", ru:"спать", tr:"[tʊ sli:p]", emoji:"😴"},
+    {en:"Monday", ru:"понедельник", tr:"[ˈmᴧndeɪ]", emoji:"📅"},
+    {en:"Tuesday", ru:"вторник", tr:"[ˈtju:zdeɪ]", emoji:"📅"},
+    {en:"Wednesday", ru:"среда", tr:"[ˈwɛnzdeɪ]", emoji:"📅"},
+    {en:"Thursday", ru:"четверг", tr:"[ˈθɜ:zdeɪ]", emoji:"📅"},
+    {en:"Friday", ru:"пятница", tr:"[ˈfraɪdeɪ]", emoji:"📅"},
+    {en:"Saturday", ru:"суббота", tr:"[ˈsætǝdeɪ]", emoji:"📅"},
+    {en:"Sunday", ru:"воскресенье", tr:"[ˈsᴧndeɪ]", emoji:"📅"}
+  ]},
+  9: { title:"Чем занимаемся и режим дня", band:"#8A6FC9", words:[
+    {en:"to make toys", ru:"мастерить игрушки", tr:"[tʊ meɪk tɔɪz]", emoji:"🧸"},
+    {en:"to play games", ru:"играть в игры", tr:"[tʊ pleɪ ɡeɪmz]", emoji:"🎲"},
+    {en:"to read stories", ru:"читать истории", tr:"[tʊ ri:d ˈstɔ:rɪz]", emoji:"📖"},
+    {en:"to watch cartoons", ru:"смотреть мультики", tr:"[tʊ wɒtʃ kǝˈtu:nz]", emoji:"📺"},
+    {en:"to sing songs", ru:"петь песни", tr:"[tʊ sɪŋ sɒŋz]", emoji:"🎤"},
+    {en:"to drink milk", ru:"пить молоко", tr:"[tʊ drɪnk mɪlk]", emoji:"🥛"},
+    {en:"to play tennis", ru:"играть в теннис", tr:"[tʊ pleɪ ˈtɛnɪs]", emoji:"🎾"},
+    {en:"to eat vegetables", ru:"есть овощи", tr:"[tʊ i:t ˈvɛdӡɪtǝbǝlz]", emoji:"🥦"},
+    {en:"in the morning", ru:"утром", tr:"[ɪn ðǝ ˈmɔ:nɪŋ]", emoji:"🌅"},
+    {en:"in the afternoon", ru:"после обеда", tr:"[ɪn ðǝ ˈa:ftǝˈnu:n]", emoji:"🌤️"},
+    {en:"in the evening", ru:"вечером", tr:"[ɪn ðǝ ˈi:vnɪŋ]", emoji:"🌇"},
+    {en:"at night", ru:"ночью", tr:"[æt naɪt]", emoji:"🌙"},
+    {en:"to have a shower", ru:"принимать душ", tr:"[tʊ hæv ǝ ˈʃaʊǝ]", emoji:"🚿"},
+    {en:"to have breakfast", ru:"завтракать", tr:"[tʊ hæv ˈbrɛkfǝst]", emoji:"🥣"},
+    {en:"to have lunch", ru:"обедать", tr:"[tʊ hæv lᴧntʃ]", emoji:"🍽️"},
+    {en:"to have supper", ru:"ужинать", tr:"[tʊ hæv ˈsᴧpǝ]", emoji:"🍝"},
+    {en:"to listen to music", ru:"слушать музыку", tr:"[tʊ lɪsn tʊ ˈmju:zɪk]", emoji:"🎧"},
+    {en:"to visit my friend", ru:"навещать друга", tr:"[tʊ ˈvɪzɪt maɪ frɛnd]", emoji:"🚪"},
+    {en:"to go to bed", ru:"ложиться спать", tr:"[tʊ ɡǝʊ tʊ bɛd]", emoji:"🛏️"},
+    {en:"to get up", ru:"вставать", tr:"[tʊ ɡɛt ᴧp]", emoji:"⏰"}
+  ]}
+}, // конец 3 класса
+
+4: {
+  1: { title:"Внешность и предлоги", band:"#F4A15B", words:[
+    {en:"plump", ru:"полный", tr:"[plʌmp]", emoji:"🧑"},
+    {en:"slim", ru:"стройный", tr:"[slim]", emoji:"🧍"},
+    {en:"fair hair", ru:"светловолосый", tr:"[fɛə hɛǝ]", emoji:"👱"},
+    {en:"dark hair", ru:"темноволосый", tr:"[da:k hɛǝ]", emoji:"👤"},
+    {en:"funny", ru:"забавный", tr:"[ˈfʌni]", emoji:"😄"},
+    {en:"short", ru:"низкий, короткий", tr:"[ʃɔ:t]", emoji:"📏"},
+    {en:"tall", ru:"высокий", tr:"[tɔ:l]", emoji:"🧍‍♂️"},
+    {en:"kind", ru:"добрый", tr:"[kaɪnd]", emoji:"💛"},
+    {en:"friendly", ru:"дружелюбный", tr:"[ˈfrɛndli]", emoji:"🤝"},
+    {en:"look like", ru:"выглядеть", tr:"[lʊk laɪk]", emoji:"👀"},
+    {en:"in", ru:"в", tr:"[ɪn]", emoji:"📥"},
+    {en:"on", ru:"на", tr:"[ɒn]", emoji:"📤"},
+    {en:"in front of", ru:"впереди", tr:"[ɪn frʌnt ɒv]", emoji:"⏭️"},
+    {en:"under", ru:"под", tr:"[ˈʌndə]", emoji:"⬇️"},
+    {en:"next to", ru:"рядом с", tr:"[nekst tu]", emoji:"↔️"},
+    {en:"behind", ru:"позади", tr:"[bɪˈhaɪnd]", emoji:"⏮️"}
+  ]},
+  2: { title:"Мои вещи и увлечения", band:"#F48FB1", words:[
+    {en:"hairbrush", ru:"расчёска", tr:"[ˈheəbrʌʃ]", emoji:"💇"},
+    {en:"roller blades", ru:"роликовые коньки", tr:"[ˈrəʊlə ˈbleɪdz]", emoji:"🛼"},
+    {en:"keys", ru:"ключи", tr:"[ki:z]", emoji:"🔑"},
+    {en:"gloves", ru:"перчатки", tr:"[ɡlʌvz]", emoji:"🧤"},
+    {en:"helmet", ru:"шлем", tr:"[ˈhelmɪt]", emoji:"⛑️"},
+    {en:"mobile phone", ru:"мобильный телефон", tr:"[ˈməʊbaɪl fəʊn]", emoji:"📱"},
+    {en:"watch", ru:"часы (ручные)", tr:"[wɒtʃ]", emoji:"⌚"},
+    {en:"guitar", ru:"гитара", tr:"[ɡɪˈta:]", emoji:"🎸"},
+    {en:"camera", ru:"камера, фотоаппарат", tr:"[ˈkæmərə]", emoji:"📷"},
+    {en:"CDs", ru:"диски", tr:"[ˈsi:ˈdi:z]", emoji:"💿"},
+    {en:"skiing", ru:"катание на лыжах", tr:"[ˈski:ɪŋ]", emoji:"⛷️"},
+    {en:"sailing", ru:"плавание под парусом", tr:"[ˈseɪlɪŋ]", emoji:"⛵"},
+    {en:"skating", ru:"катание на коньках", tr:"[ˈskeɪtɪŋ]", emoji:"⛸️"},
+    {en:"playing the violin", ru:"игра на скрипке", tr:"[ˈpleɪɪŋ ðə vaɪəˈlɪn]", emoji:"🎻"},
+    {en:"surfing", ru:"сёрфинг", tr:"[ˈsɜ:fɪŋ]", emoji:"🏄"},
+    {en:"diving", ru:"ныряние", tr:"[ˈdaɪvɪŋ]", emoji:"🤿"}
+  ]},
+  3: { title:"Числа и наречия частоты", band:"#3FA9F5", words:[
+    {en:"ten", ru:"10", tr:"[ten]", emoji:"🔟"},
+    {en:"twenty", ru:"20", tr:"[ˈtwenti]", emoji:"2️⃣0️⃣"},
+    {en:"thirty", ru:"30", tr:"[ˈθɜ:ti]", emoji:"3️⃣0️⃣"},
+    {en:"forty", ru:"40", tr:"[ˈfɔ:ti]", emoji:"4️⃣0️⃣"},
+    {en:"fifty", ru:"50", tr:"[ˈfɪfti]", emoji:"5️⃣0️⃣"},
+    {en:"sixty", ru:"60", tr:"[ˈsɪksti]", emoji:"6️⃣0️⃣"},
+    {en:"seventy", ru:"70", tr:"[ˈsevəntɪ]", emoji:"7️⃣0️⃣"},
+    {en:"eighty", ru:"80", tr:"[ˈeɪti]", emoji:"8️⃣0️⃣"},
+    {en:"ninety", ru:"90", tr:"[ˈnaɪnti]", emoji:"9️⃣0️⃣"},
+    {en:"a hundred", ru:"100", tr:"[ə ˈhʌndrɪd]", emoji:"💯"},
+    {en:"always", ru:"всегда", tr:"[ˈɔ:lweɪz]", emoji:"🔁"},
+    {en:"sometimes", ru:"иногда", tr:"[ˈsʌmtaɪmz]", emoji:"🔀"},
+    {en:"usually", ru:"обычно", tr:"[ˈju:ʒuəli]", emoji:"📌"},
+    {en:"never", ru:"никогда", tr:"[ˈnevə]", emoji:"🚫"},
+    {en:"how often?", ru:"как часто?", tr:"[haʊ ˈɒfn]", emoji:"❓"},
+    {en:"once a week", ru:"раз в неделю", tr:"[wʌns ə wi:k]", emoji:"1️⃣"},
+    {en:"twice a week", ru:"дважды в неделю", tr:"[twaɪs ə wi:k]", emoji:"2️⃣"},
+    {en:"three times a week", ru:"трижды в неделю", tr:"[θri: taɪmz ə wi:k]", emoji:"3️⃣"}
+  ]},
+  4: { title:"Город: места и профессии", band:"#3FA9F5", words:[
+    {en:"station", ru:"станция", tr:"[ˈsteɪʃn]", emoji:"🚉"},
+    {en:"garage", ru:"гараж", tr:"[ˈɡæra:ʒ]", emoji:"🚗"},
+    {en:"café", ru:"кафе", tr:"[ˈkæfeɪ]", emoji:"☕"},
+    {en:"theatre", ru:"театр", tr:"[ˈθɪətə]", emoji:"🎭"},
+    {en:"baker's", ru:"пекарня", tr:"[ˈbeɪkəz]", emoji:"🥖"},
+    {en:"hospital", ru:"больница", tr:"[ˈhɒspɪtl]", emoji:"🏥"},
+    {en:"greengrocer's", ru:"овощной магазин", tr:"[ˈɡri:nɡrəʊsəz]", emoji:"🥬"},
+    {en:"post office", ru:"почта", tr:"[ˈpəʊst ɒfɪs]", emoji:"📮"},
+    {en:"baker", ru:"пекарь", tr:"[ˈbeɪkə]", emoji:"👨‍🍳"},
+    {en:"greengrocer", ru:"продавец овощей", tr:"[ˈɡri:nɡrəʊsə]", emoji:"🧑‍🌾"},
+    {en:"mechanic", ru:"механик", tr:"[mɪˈkænɪk]", emoji:"🔧"},
+    {en:"postman", ru:"почтальон", tr:"[ˈpəʊstmən]", emoji:"📬"},
+    {en:"waiter", ru:"официант", tr:"[ˈweɪtə]", emoji:"🧑‍🍽️"},
+    {en:"nurse", ru:"медсестра", tr:"[nɜ:s]", emoji:"👩‍⚕️"},
+    {en:"firefighter", ru:"пожарный", tr:"[ˈfaɪəfaɪtə]", emoji:"👨‍🚒"},
+    {en:"taxi driver", ru:"водитель такси", tr:"[ˈtæksi draɪvə]", emoji:"🚕"},
+    {en:"bus driver", ru:"водитель автобуса", tr:"[ˈbʌs draɪvə]", emoji:"🚌"},
+    {en:"zoo keeper", ru:"смотритель зоопарка", tr:"[ˈzu: ki:pə]", emoji:"🦁"},
+    {en:"police officer", ru:"полицейский", tr:"[pəˈli:s ɒfəsə]", emoji:"👮"},
+    {en:"vet", ru:"ветеринар", tr:"[vet]", emoji:"🐾"}
+  ]},
+  5: { title:"Еда и упаковка", band:"#5AA82E", words:[
+    {en:"lemon", ru:"лимон", tr:"[ˈlemən]", emoji:"🍋"},
+    {en:"beans", ru:"бобы", tr:"[bi:nz]", emoji:"🫘"},
+    {en:"mango", ru:"манго", tr:"[ˈmæŋɡəʊ]", emoji:"🥭"},
+    {en:"butter", ru:"сливочное масло", tr:"[ˈbʌtə]", emoji:"🧈"},
+    {en:"coconut", ru:"кокос", tr:"[ˈkəʊkənʌt]", emoji:"🥥"},
+    {en:"flour", ru:"мука", tr:"[ˈflaʊə]", emoji:"🌾"},
+    {en:"pineapple", ru:"ананас", tr:"[ˈpaɪnæpl]", emoji:"🍍"},
+    {en:"olive oil", ru:"оливковое масло", tr:"[ˈɒlɪv ɔɪl]", emoji:"🫒"},
+    {en:"sugar", ru:"сахар", tr:"[ˈʃʊɡə]", emoji:"🧂"},
+    {en:"salt", ru:"соль", tr:"[sɔ:lt]", emoji:"🧂"},
+    {en:"pepper", ru:"перец", tr:"[ˈpepə]", emoji:"🌶️"},
+    {en:"tomato", ru:"помидор", tr:"[təˈma:təʊ]", emoji:"🍅"},
+    {en:"a packet", ru:"пачка", tr:"[ə ˈpækɪt]", emoji:"📦"},
+    {en:"a bar", ru:"плитка (шоколада)", tr:"[ə ba:]", emoji:"🍫"},
+    {en:"a kilo", ru:"килограмм", tr:"[ə ˈki:ləʊ]", emoji:"⚖️"},
+    {en:"a loaf", ru:"буханка", tr:"[ə ləʊf]", emoji:"🍞"},
+    {en:"a jar", ru:"баночка", tr:"[ə dʒa:]", emoji:"🍯"},
+    {en:"a carton", ru:"коробка (молока)", tr:"[ə ˈka:tn]", emoji:"🧃"},
+    {en:"a bottle", ru:"бутылка", tr:"[ə ˈbɒtl]", emoji:"🍾"},
+    {en:"a tin", ru:"жестяная банка", tr:"[ə tɪn]", emoji:"🥫"}
+  ]},
+  6: { title:"Животные и месяцы", band:"#5AA82E", words:[
+    {en:"giraffe", ru:"жираф", tr:"[dʒɪˈra:f]", emoji:"🦒"},
+    {en:"monkey", ru:"обезьяна", tr:"[ˈmʌŋki]", emoji:"🐒"},
+    {en:"dolphin", ru:"дельфин", tr:"[ˈdɒlfɪn]", emoji:"🐬"},
+    {en:"seal", ru:"тюлень", tr:"[si:l]", emoji:"🦭"},
+    {en:"lizard", ru:"ящерица", tr:"[ˈlɪzəd]", emoji:"🦎"},
+    {en:"whale", ru:"кит", tr:"[weɪl]", emoji:"🐳"},
+    {en:"hippo", ru:"гиппопотам", tr:"[ˈhɪpəʊ]", emoji:"🦛"},
+    {en:"crocodile", ru:"крокодил", tr:"[ˈkrɒkədaɪl]", emoji:"🐊"},
+    {en:"January", ru:"январь", tr:"[ˈdʒænjuəri]", emoji:"❄️"},
+    {en:"February", ru:"февраль", tr:"[ˈfebruəri]", emoji:"⛄"},
+    {en:"March", ru:"март", tr:"[ma:tʃ]", emoji:"🌷"},
+    {en:"April", ru:"апрель", tr:"[ˈeɪprəl]", emoji:"🌦️"},
+    {en:"May", ru:"май", tr:"[meɪ]", emoji:"🌼"},
+    {en:"June", ru:"июнь", tr:"[dʒu:n]", emoji:"☀️"},
+    {en:"July", ru:"июль", tr:"[dʒuˈlaɪ]", emoji:"🏖️"},
+    {en:"August", ru:"август", tr:"[ˈɔ:ɡʌst]", emoji:"🌻"},
+    {en:"September", ru:"сентябрь", tr:"[sepˈtembə]", emoji:"🍎"},
+    {en:"October", ru:"октябрь", tr:"[ɒkˈtəʊbə]", emoji:"🍂"},
+    {en:"November", ru:"ноябрь", tr:"[nəʊˈvembə]", emoji:"🌧️"},
+    {en:"December", ru:"декабрь", tr:"[dɪˈsembə]", emoji:"🎄"}
+  ]},
+  7: { title:"Эмоции и лучшее время", band:"#8A6FC9", words:[
+    {en:"sad", ru:"печальный", tr:"[sæd]", emoji:"😢"},
+    {en:"bored", ru:"скучающий", tr:"[bɔ:d]", emoji:"😑"},
+    {en:"angry", ru:"злой", tr:"[ˈæŋɡri]", emoji:"😠"},
+    {en:"scared", ru:"испуганный", tr:"[skeəd]", emoji:"😨"},
+    {en:"tired", ru:"уставший", tr:"[ˈtaɪəd]", emoji:"😴"},
+    {en:"hungry", ru:"голодный", tr:"[ˈhʌŋɡri]", emoji:"🍽️"},
+    {en:"happy", ru:"счастливый", tr:"[ˈhæpi]", emoji:"😊"},
+    {en:"museum", ru:"музей", tr:"[mjuˈzɪəm]", emoji:"🏛️"},
+    {en:"dinosaurs", ru:"динозавры", tr:"[ˈdaɪnəsɔ:z]", emoji:"🦕"},
+    {en:"concert", ru:"концерт", tr:"[ˈkɒnsət]", emoji:"🎤"},
+    {en:"funfair", ru:"ярмарка", tr:"[ˈfʌnfeə]", emoji:"🎡"},
+    {en:"rides", ru:"горки, аттракционы", tr:"[raɪdz]", emoji:"🎢"},
+    {en:"pretty", ru:"хорошенькая", tr:"[ˈprɪti]", emoji:"😍"},
+    {en:"shy", ru:"скромная", tr:"[ʃaɪ]", emoji:"🙈"},
+    {en:"good", ru:"хороший", tr:"[ɡʊd]", emoji:"👍"},
+    {en:"strong", ru:"сильный", tr:"[strɒŋ]", emoji:"💪"},
+    {en:"loud", ru:"громкий", tr:"[laʊd]", emoji:"📢"}
+  ]},
+  8: { title:"Страны, отдых и погода", band:"#8A6FC9", words:[
+    {en:"piano", ru:"пианино", tr:"[piˈænəʊ]", emoji:"🎹"},
+    {en:"trumpet", ru:"труба", tr:"[ˈtrʌmpɪt]", emoji:"🎺"},
+    {en:"drums", ru:"барабаны", tr:"[drʌmz]", emoji:"🥁"},
+    {en:"violin", ru:"скрипка", tr:"[vaɪəˈlɪn]", emoji:"🎻"},
+    {en:"guitar", ru:"гитара", tr:"[ɡɪˈta:]", emoji:"🎸"},
+    {en:"Greece", ru:"Греция", tr:"[ɡri:s]", emoji:"🇬🇷"},
+    {en:"Italy", ru:"Италия", tr:"[ˈɪtəli]", emoji:"🇮🇹"},
+    {en:"Portugal", ru:"Португалия", tr:"[ˈpɔ:tjʊɡəl]", emoji:"🇵🇹"},
+    {en:"Russia", ru:"Россия", tr:"[ˈrʌʃə]", emoji:"🇷🇺"},
+    {en:"Mexico", ru:"Мексика", tr:"[ˈmeksɪkəʊ]", emoji:"🇲🇽"},
+    {en:"Poland", ru:"Польша", tr:"[ˈpəʊlənd]", emoji:"🇵🇱"},
+    {en:"Spain", ru:"Испания", tr:"[speɪn]", emoji:"🇪🇸"},
+    {en:"Turkey", ru:"Турция", tr:"[ˈtɜ:ki]", emoji:"🇹🇷"},
+    {en:"Japan", ru:"Япония", tr:"[dʒəˈpæn]", emoji:"🇯🇵"},
+    {en:"swimsuit", ru:"купальник", tr:"[ˈswɪmsu:t]", emoji:"🩱"},
+    {en:"sunglasses", ru:"солнечные очки", tr:"[ˈsʌnɡla:sɪz]", emoji:"🕶️"},
+    {en:"swimming trunks", ru:"плавки", tr:"[ˈswɪmɪŋ trʌŋks]", emoji:"🩳"},
+    {en:"boots", ru:"ботинки", tr:"[bu:ts]", emoji:"🥾"},
+    {en:"tent", ru:"палатка", tr:"[tent]", emoji:"⛺"},
+    {en:"flippers", ru:"ласты", tr:"[ˈflɪpəz]", emoji:"🤿"},
+    {en:"sleeping bag", ru:"спальный мешок", tr:"[ˈsli:pɪŋ bæɡ]", emoji:"🛌"},
+    {en:"sunny", ru:"солнечно", tr:"[ˈsʌni]", emoji:"☀️"},
+    {en:"windy", ru:"ветрено", tr:"[ˈwɪndi]", emoji:"💨"},
+    {en:"cloudy", ru:"облачно", tr:"[ˈklaʊdi]", emoji:"☁️"},
+    {en:"rainy", ru:"дождливо", tr:"[ˈreɪni]", emoji:"🌧️"},
+    {en:"cold", ru:"холодно", tr:"[kəʊld]", emoji:"❄️"},
+    {en:"hot", ru:"жарко", tr:"[hɒt]", emoji:"🥵"}
+  ]}
+} // конец 4 класса
+
+};
+
+
+let currentUnit = null;
+let WORDS = [];          // весь словарь текущего юнита
+let weakWords = [];      // слова, отмеченные "не знаю" на этапе оценки
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function speakWord(word){
+  if(!word) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(word.en);
+  u.lang = "en-GB";
+  u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ================= ЭКРАН 1: СПИСОК ЮНИТОВ (с переключением класса) ================= */
+let currentGrade = 2;
+
+function selectGrade(grade){
+  currentGrade = grade;
+  document.querySelectorAll('.grade-tab').forEach(t=>{
+    t.classList.toggle('active', parseInt(t.dataset.grade)===grade);
+  });
+  renderUnitList();
+}
+function renderUnitList(){
+  const list = document.getElementById('unitList');
+  list.innerHTML = '';
+  const grade = GRADE_DATA[currentGrade];
+  Object.keys(grade).forEach(numStr=>{
+    const num = parseInt(numStr);
+    const u = grade[num];
+    const preview = u.words.slice(0,5).map(w=>w.emoji);
+    const card = document.createElement('div');
+    card.className = 'unit-card';
+    card.innerHTML =
+      '<div class="unit-top">'+
+        '<span class="unit-num" style="background:'+u.band+';">Юнит '+num+'</span>'+
+        '<span class="status-chip">пробный доступ</span>'+
+      '</div>'+
+      '<div><h3 class="unit-title">'+u.title+'</h3>'+
+      '<div class="unit-count">'+u.words.length+' слов</div></div>'+
+      '<div class="preview-row">'+preview.map(e=>'<div class="preview-chip">'+e+'</div>').join('')+'</div>'+
+      '<div class="unit-cta">Начать →</div>';
+    card.onclick = ()=>selectUnit(num);
+    list.appendChild(card);
+  });
+}
+function goToUnitList(){
+  currentUnit = null;
+  document.getElementById('topBadge').textContent = 'Spotlight · '+currentGrade+' класс';
+  showScreen('screen-unitlist');
+}
+function selectUnit(num){
+  currentUnit = num;
+  const u = GRADE_DATA[currentGrade][num];
+  WORDS = u.words;
+  weakWords = [];
+  document.getElementById('topBadge').textContent = currentGrade+' класс · Юнит '+num+' · '+u.title;
+  startAssessment();
+}
+
+/* ================= ЭКРАН 2: ОЦЕНКА ЗНАЮ / НЕ ЗНАЮ (сетка) ================= */
+let marks = {}; // en -> 'yes' | 'no' | undefined
+
+function startAssessment(){
+  marks = {};
+  renderAssessGrid();
+  showScreen('screen-assess');
+}
+function renderAssessGrid(){
+  const grid = document.getElementById('assessGrid');
+  grid.innerHTML = '';
+  WORDS.forEach(w=>{
+    const card = document.createElement('div');
+    card.className = 'assess-card';
+    card.dataset.en = w.en;
+    card.innerHTML =
+      '<div class="assess-card-top">'+
+        '<span class="a-en">'+w.en+'</span>'+
+        '<span class="a-tap-hint">👆 нажми</span>'+
+        '<div class="a-back">'+
+          '<span class="a-emoji">'+w.emoji+'</span>'+
+          '<span class="a-tr">'+w.tr+'</span>'+
+          '<span class="a-ru">'+w.ru+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="assess-card-marks">'+
+        '<button class="mark-btn mb-no">❌</button>'+
+        '<button class="mark-btn mb-yes">✅</button>'+
+      '</div>';
+
+    const top = card.querySelector('.assess-card-top');
+    const back = card.querySelector('.a-back');
+    const tapHint = card.querySelector('.a-tap-hint');
+    top.onclick = ()=>{
+      back.style.display = 'block';
+      tapHint.style.display = 'none';
+      speakWord(w);
+    };
+    card.querySelector('.mb-no').onclick = (e)=>{ e.stopPropagation(); markWord(w, 'no'); };
+    card.querySelector('.mb-yes').onclick = (e)=>{ e.stopPropagation(); markWord(w, 'yes'); };
+
+    grid.appendChild(card);
+  });
+  updateAssessProgress();
+}
+function markWord(w, value){
+  marks[w.en] = value;
+  const card = document.querySelector('.assess-card[data-en="'+CSS.escape(w.en)+'"]');
+  if(card){
+    card.classList.remove('mark-yes','mark-no');
+    card.classList.add(value==='yes' ? 'mark-yes' : 'mark-no');
+    card.querySelector('.a-back').style.display = 'block';
+    const tapHint = card.querySelector('.a-tap-hint');
+    if(tapHint) tapHint.style.display = 'none';
+    card.querySelector('.mb-no').classList.toggle('active-no', value==='no');
+    card.querySelector('.mb-yes').classList.toggle('active-yes', value==='yes');
+  }
+  updateAssessProgress();
+}
+function updateAssessProgress(){
+  const total = WORDS.length;
+  const marked = Object.keys(marks).length;
+  document.getElementById('assessProgressFill').style.width = (marked/total*100)+'%';
+  document.getElementById('assessProgressCount').textContent = 'Отмечено: '+marked+' / '+total;
+}
+
+/* ================= ЭКРАН 3: РЕЗУЛЬТАТ ОЦЕНКИ ================= */
+function showSummary(){
+  weakWords = WORDS.filter(w => marks[w.en] !== 'yes');
+  const knowCount = WORDS.length - weakWords.length;
+  document.getElementById('sumKnow').textContent = knowCount;
+  document.getElementById('sumDontKnow').textContent = weakWords.length;
+  const body = document.getElementById('summaryBody');
+
+  if(weakWords.length === 0){
+    body.innerHTML =
+      '<p style="text-align:center; color:var(--ink-soft); font-size:14px; margin-bottom:18px;">Ребёнок знает все слова этого юнита. Можно потренировать их ещё раз в игровом режиме или перейти к следующему юниту.</p>'+
+      '<button class="btn primary" onclick="trainAll()">Потренировать все слова</button>'+
+      '<div style="height:8px;"></div>'+
+      '<button class="btn ghost" onclick="goToUnitList()">Выбрать другой юнит</button>';
+  } else {
+    let list = '<ul class="weak-list">';
+    weakWords.forEach(w=>{
+      list += '<li class="weak-item"><span class="emoji">'+w.emoji+'</span><span class="en">'+w.en+'</span><span class="ru">— '+w.ru+'</span></li>';
+    });
+    list += '</ul>';
+    body.innerHTML = list + '<button class="btn primary" onclick="showScreen(\'screen-trainpick\')">Начать тренировку этих слов →</button>';
+  }
+  showScreen('screen-summary');
+}
+function trainAll(){
+  weakWords = WORDS.slice();
+  showScreen('screen-trainpick');
+}
+
+/* Пул слов для тренировки: если "не знаю" слов меньше минимума — добираем из полного словаря юнита,
+   чтобы игры вроде "найди пару" не оставались с одной-двумя карточками. */
+function trainingPool(minCount){
+  if(weakWords.length >= minCount) return weakWords;
+  const extra = WORDS.filter(w=>!weakWords.find(x=>x.en===w.en));
+  return weakWords.concat(shuffle(extra)).slice(0, Math.max(minCount, weakWords.length));
+}
+
+/* ================= QUIZ ================= */
+let quizOrder = [], quizIndex = 0, quizScore = 0;
+let activeSession = 0; // защита от "залипших" таймеров после остановки тренировки
+
+/* ================= БАННЕР-НАПОМИНАНИЕ: откуда и почему ================= */
+/* Ключи совпадают с кодовыми словами из банка хуков (файл 06) и банка фактов Кулагиной (файл 08),
+   чтобы сообщение на экране совпадало с тем, что человек только что видел в Reels.
+   Ссылка вида ...html?hook=doska&grade=2&unit=1 */
+function initReminderBanner(){
+  const banner = document.getElementById('reminderBanner');
+  const hook = (urlParams.get('hook') || '').toLowerCase();
+  const messages = {
+    doska: 'Вы здесь, потому что ребёнок знает слово дома, но теряется у доски. <b>Тренируем вспоминание, а не просто узнавание.</b>',
+    krug: 'Вы здесь, чтобы разорвать круг «критика → тревога → результат хуже». <b>Тренажёр не ругает — просто даёт повторить ещё раз.</b>',
+    kostyl: 'Вы здесь, чтобы ребёнок делал английский сам, без вас рядом каждый вечер. <b>Для этого и открыт пробный период.</b>',
+    slezy: 'Вы здесь, потому что домашка по английскому заканчивается слезами. <b>Короткие тренировки без давления — то, ради чего вы зашли.</b>',
+    zabyvaet: 'Вы здесь, потому что ребёнок учит слова, а к пятнице всё забывает. <b>Разнесённое повторение решает именно эту проблему.</b>',
+    '20minut': 'Вы здесь, потому что час над учебником не работает. <b>Тренировки короче возрастного предела внимания — 15–20 минут.</b>',
+    troyka: 'Вы здесь, чтобы проверить, в чём на самом деле дело: в словах или в способе их учить. <b>Пройдите тест — увидите сами.</b>',
+    gdz: 'Вы здесь, потому что домашка делается по ГДЗ, а не по-настоящему. <b>Это про то, как разорвать эту привычку.</b>',
+    dengi: 'Вы здесь, чтобы понять, нужен ли вообще репетитор в началке. <b>Три дня бесплатно — и станет ясно.</b>'
+  };
+  const text = messages[hook] || 'Вы здесь, чтобы проверить, что ребёнок реально знает по английскому — и потренировать именно то, что забыто. <b>Пробный доступ открыт 3 дня, бесплатно.</b>';
+  banner.innerHTML = '📍 ' + text;
+  banner.style.display = 'block';
+}
+
+function stopTraining(){
+  activeSession++;
+  window.speechSynthesis.cancel();
+  document.getElementById('doneEmoji').textContent = '⏸️';
+  document.getElementById('doneTitle').textContent = 'Тренировка остановлена';
+  document.getElementById('doneSub').textContent = 'Можно продолжить в любой момент — прогресс не потерян';
+  showScreen('screen-done');
+}
+
+function startQuiz(){
+  activeSession++;
+  quizOrder = shuffle(trainingPool(4)).slice(0,10);
+  quizIndex = 0; quizScore = 0;
+  renderQuiz();
+  showScreen('screen-quiz');
+}
+function currentQuizWord(){ return quizOrder[quizIndex]; }
+function renderQuiz(){
+  const w = currentQuizWord();
+  document.getElementById('quizEmoji').textContent = w.emoji;
+  document.getElementById('quizWordEn').textContent = w.en;
+  document.getElementById('quizProgressFill').style.width = (quizIndex/quizOrder.length*100)+'%';
+  document.getElementById('quizProgressCount').textContent = (quizIndex+1)+' / '+quizOrder.length;
+  speakWord(w);
+
+  let options = shuffle(WORDS.filter(x=>x.en!==w.en)).slice(0,3).map(x=>x.ru);
+  options.push(w.ru);
+  options = shuffle(options);
+
+  const optsEl = document.getElementById('quizOpts');
+  optsEl.innerHTML = '';
+  options.forEach(opt=>{
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.textContent = opt;
+    b.onclick = ()=>checkQuizAnswer(b, opt, w.ru);
+    optsEl.appendChild(b);
+  });
+}
+function checkQuizAnswer(btn, chosen, correct){
+  const mySession = activeSession;
+  document.querySelectorAll('#quizOpts .opt-btn').forEach(b=>b.onclick=null);
+  if(chosen===correct){
+    btn.classList.add('correct');
+    quizScore++;
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('#quizOpts .opt-btn').forEach(b=>{
+      if(b.textContent===correct) b.classList.add('correct');
+    });
+  }
+  setTimeout(()=>{
+    if(activeSession !== mySession) return; // тренировку успели остановить
+    quizIndex++;
+    if(quizIndex>=quizOrder.length){
+      finishTraining('quiz', quizScore+' из '+quizOrder.length+' правильно');
+    } else {
+      renderQuiz();
+    }
+  }, 900);
+}
+
+/* ================= MATCH ================= */
+let matchWords = [], matchSelected = [], matchFound = 0;
+function startMatch(){
+  activeSession++;
+  matchWords = shuffle(trainingPool(4)).slice(0,8);
+  matchSelected = [];
+  matchFound = 0;
+  renderMatch();
+  showScreen('screen-match');
+}
+function renderMatch(){
+  const enCards = matchWords.map(w=>({type:'en', word:w}));
+  const ruCards = matchWords.map(w=>({type:'ru', word:w}));
+  const all = shuffle(enCards.concat(ruCards));
+  const grid = document.getElementById('matchGrid');
+  grid.innerHTML = '';
+  all.forEach((c)=>{
+    const div = document.createElement('div');
+    div.className = 'match-card';
+    div.textContent = c.type==='en' ? c.word.emoji+' '+c.word.en : c.word.ru;
+    div.dataset.en = c.word.en;
+    div.dataset.type = c.type;
+    div.onclick = ()=>selectMatch(div);
+    grid.appendChild(div);
+  });
+  document.getElementById('matchProgressCount').textContent = 'Найдено пар: '+matchFound+' / '+matchWords.length;
+}
+function selectMatch(div){
+  if(div.classList.contains('matched') || div.classList.contains('selected')) return;
+  const mySession = activeSession;
+  if(div.dataset.type==='en'){
+    const w = matchWords.find(x=>x.en===div.dataset.en);
+    speakWord(w);
+  }
+  div.classList.add('selected');
+  matchSelected.push(div);
+  if(matchSelected.length===2){
+    const [a,b] = matchSelected;
+    if(a.dataset.en===b.dataset.en && a.dataset.type!==b.dataset.type){
+      setTimeout(()=>{
+        if(activeSession !== mySession) return;
+        a.classList.add('matched'); b.classList.add('matched');
+        a.classList.remove('selected'); b.classList.remove('selected');
+        matchFound++;
+        document.getElementById('matchProgressCount').textContent = 'Найдено пар: '+matchFound+' / '+matchWords.length;
+        matchSelected = [];
+        if(matchFound===matchWords.length){
+          setTimeout(()=>{ if(activeSession===mySession) finishTraining('match', 'Все пары найдены'); }, 500);
+        }
+      }, 350);
+    } else {
+      setTimeout(()=>{
+        if(activeSession !== mySession) return;
+        a.classList.remove('selected'); b.classList.remove('selected');
+        matchSelected = [];
+      }, 600);
+    }
+  }
+}
+
+/* ================= SPELL ================= */
+let spellOrder = [], spellIndex = 0, spellAnswer = [];
+function startSpell(){
+  activeSession++;
+  spellOrder = shuffle(trainingPool(3));
+  spellIndex = 0;
+  renderSpell();
+  showScreen('screen-spell');
+}
+function currentSpellWord(){ return spellOrder[spellIndex]; }
+function renderSpell(){
+  const w = currentSpellWord();
+  spellAnswer = [];
+  document.getElementById('spellEmoji').textContent = w.emoji;
+  document.getElementById('spellWordRu').textContent = w.ru;
+  document.getElementById('spellProgressFill').style.width = (spellIndex/spellOrder.length*100)+'%';
+  document.getElementById('spellProgressCount').textContent = (spellIndex+1)+' / '+spellOrder.length;
+
+  const cleanWord = w.en.replace(/[^a-zA-Z]/g,'');
+  const slots = document.getElementById('spellSlots');
+  slots.innerHTML = '';
+  for(let i=0;i<cleanWord.length;i++){
+    const s = document.createElement('div');
+    s.className = 'slot-letter';
+    s.style.opacity = '0.15';
+    slots.appendChild(s);
+  }
+
+  const letters = shuffle(cleanWord.split(''));
+  const bank = document.getElementById('letterBank');
+  bank.innerHTML = '';
+  letters.forEach((ch)=>{
+    const t = document.createElement('div');
+    t.className = 'letter-tile';
+    t.textContent = ch;
+    t.onclick = ()=>pickLetter(t, ch, cleanWord.length);
+    bank.appendChild(t);
+  });
+  speakWord(w);
+}
+function pickLetter(tile, ch, len){
+  if(tile.classList.contains('used')) return;
+  if(spellAnswer.length >= len) return;
+  spellAnswer.push(ch);
+  tile.classList.add('used');
+  const slot = document.querySelectorAll('.slot-letter')[spellAnswer.length-1];
+  slot.textContent = ch;
+  slot.style.opacity = '1';
+}
+function clearSpell(){
+  spellAnswer = [];
+  document.querySelectorAll('.slot-letter').forEach(s=>{s.textContent='';s.style.opacity='0.15';});
+  document.querySelectorAll('.letter-tile').forEach(t=>t.classList.remove('used'));
+}
+function checkSpell(){
+  const w = currentSpellWord();
+  const mySession = activeSession;
+  const cleanWord = w.en.replace(/[^a-zA-Z]/g,'').toLowerCase();
+  const guess = spellAnswer.join('').toLowerCase();
+  if(guess === cleanWord){
+    speakWord(w);
+    document.querySelectorAll('.slot-letter').forEach(s=>s.style.background='#5AA82E');
+    setTimeout(()=>{
+      if(activeSession !== mySession) return;
+      spellIndex++;
+      if(spellIndex>=spellOrder.length){
+        finishTraining('spell', 'Все слова собраны');
+      } else {
+        renderSpell();
+        document.querySelectorAll('.slot-letter').forEach(s=>s.style.background='');
+      }
+    }, 700);
+  } else {
+    document.querySelectorAll('.slot-letter').forEach(s=>s.style.background='#EF476F');
+    setTimeout(()=>{
+      if(activeSession !== mySession) return;
+      document.querySelectorAll('.slot-letter').forEach(s=>s.style.background='');
+      clearSpell();
+    }, 500);
+  }
+}
+
+/* ================= ЗАВЕРШЕНИЕ ТРЕНИРОВКИ ================= */
+function finishTraining(mode, resultText){
+  const icons = {quiz:'🎯', match:'🧩', spell:'🔤'};
+  document.getElementById('doneEmoji').textContent = icons[mode] || '🎉';
+  document.getElementById('doneTitle').textContent = 'Тренировка завершена';
+  document.getElementById('doneSub').textContent = resultText;
+  showScreen('screen-done');
+}
+
+/* ================= СТАРТ ================= */
+const urlParams = new URLSearchParams(window.location.search);
+const gradeParam = parseInt(urlParams.get('grade'));
+if(gradeParam && GRADE_DATA[gradeParam]){
+  currentGrade = gradeParam;
+  document.querySelectorAll('.grade-tab').forEach(t=>{
+    t.classList.toggle('active', parseInt(t.dataset.grade)===currentGrade);
+  });
+}
+renderUnitList();
+initReminderBanner();
+
+const startParam = urlParams.get('unit');
+if(startParam && GRADE_DATA[currentGrade][parseInt(startParam)]){
+  selectUnit(parseInt(startParam));
+}
+</script>
+</body>
+</html>
