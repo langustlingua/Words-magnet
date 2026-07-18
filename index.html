@@ -261,6 +261,7 @@
     display:grid;
     grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));
     gap:10px;
+    align-items:start;
   }
   .assess-card{
     background:#F2F5FA;
@@ -273,6 +274,7 @@
   .assess-card.mark-yes{background:#EAF6E4; border-color:var(--green);}
   .assess-card.mark-no{background:#FDEAEF; border-color:var(--red);}
   .assess-card-top{cursor:pointer; min-height:54px;}
+  .assess-card-top *{pointer-events:none;}
   .assess-card .a-en{font-weight:800; font-size:15px; color:var(--ink); display:block; line-height:1.25; word-break:break-word;}
   .assess-card .a-tap-hint{font-size:10px; color:var(--ink-soft); display:block; margin-top:4px;}
   .assess-card .a-back{display:none; margin-top:6px;}
@@ -288,6 +290,15 @@
   }
   .mark-btn.active-no{background:#F3DCE0; border-color:#F3DCE0; color:#B15561;}
   .mark-btn.active-yes{background:#DCEBDD; border-color:#DCEBDD; color:#4C8B52;}
+
+  .other-units-block{margin-top:20px; padding-top:16px; border-top:1px solid #EEF1F6;}
+  .other-units-title{font-size:12.5px; color:var(--ink-soft); margin:0 0 10px; font-weight:700;}
+  .other-units-grid{display:flex; flex-direction:column; gap:8px; max-height:280px; overflow:auto; margin-bottom:10px;}
+  .other-unit-item{display:flex; align-items:center; gap:10px; background:#F2F5FA; border-radius:12px; padding:10px 12px; cursor:pointer; transition:transform .1s ease;}
+  .other-unit-item:active{transform:scale(.98);}
+  .ou-num{font-size:10.5px; font-weight:800; color:white; padding:3px 9px; border-radius:999px; flex-shrink:0; white-space:nowrap;}
+  .ou-title{flex:1; font-size:13px; font-weight:700; color:var(--ink);}
+  .ou-count{font-size:11px; color:var(--ink-soft); flex-shrink:0; white-space:nowrap;}
 
   .sound-btn{
     width:48px; height:48px; border-radius:50%; background:var(--ink); color:white; border:none;
@@ -464,25 +475,18 @@
     <div class="unit-list" id="unitList"></div>
   </div>
 
-  <!-- ОЦЕНКА ЗНАЮ / НЕ ЗНАЮ -->
+  <!-- ОЦЕНКА ЗНАЮ / НЕ ЗНАЮ + ЖИВОЙ РЕЗУЛЬТАТ -->
   <div class="screen" id="screen-assess">
     <div class="panel" style="min-height:auto;">
       <button class="back-link" onclick="goToUnitList()">‹ К списку юнитов</button>
-      <p class="assess-hint">Нажмите на карточку, чтобы услышать слово и увидеть перевод, затем отметьте ✅ знаю или ❌ не знаю. Неотмеченные слова тоже попадут в список на повторение.</p>
+      <p class="assess-hint">Нажмите на карточку, чтобы услышать слово и увидеть перевод, затем отметьте ✓ знаю или ✕ повторить. Неотмеченные слова тоже попадут в список на повторение.</p>
       <div class="progress-row">
         <div class="progress-bar"><div class="progress-fill" id="assessProgressFill"></div></div>
         <div class="progress-count" id="assessProgressCount">Отмечено: 0 / 15</div>
       </div>
       <div class="assess-grid" id="assessGrid"></div>
-      <button class="btn primary" style="margin-top:16px;" onclick="showSummary()">Показать результат →</button>
-    </div>
-  </div>
 
-  <!-- РЕЗУЛЬТАТ ОЦЕНКИ -->
-  <div class="screen" id="screen-summary">
-    <div class="panel">
-      <button class="back-link" onclick="goToUnitList()">‹ К списку юнитов</button>
-      <div class="summary-stat">
+      <div class="summary-stat" style="margin-top:20px;">
         <div class="stat-box know"><b id="sumKnow">0</b><span>знает</span></div>
         <div class="stat-box dontknow"><b id="sumDontKnow">0</b><span>стоит повторить</span></div>
       </div>
@@ -493,7 +497,7 @@
   <!-- ВЫБОР РЕЖИМА ТРЕНИРОВКИ -->
   <div class="screen" id="screen-trainpick">
     <div class="panel">
-      <button class="back-link" onclick="showScreen('screen-summary')">‹ Назад к результату</button>
+      <button class="back-link" onclick="showScreen('screen-assess')">‹ Назад к словам</button>
       <h3 style="margin:0 0 4px;">Тренажёр-тренировка</h3>
       <p style="margin:0 0 16px; font-size:13px; color:var(--ink-soft);">Тренируем только те слова, которые ребёнок отметил «не знаю»</p>
       <div class="train-modes">
@@ -1771,8 +1775,28 @@ function updateAssessProgress(){
   const marked = Object.keys(marks).length;
   document.getElementById('assessProgressFill').style.width = (marked/total*100)+'%';
   document.getElementById('assessProgressCount').textContent = 'Отмечено: '+marked+' / '+total;
+  showSummary();
 }
 
+function otherUnitsHTML(){
+  const grade = GRADE_DATA[currentGrade];
+  let items = '';
+  Object.keys(grade).forEach(numStr=>{
+    const num = parseInt(numStr);
+    if(num === currentUnit) return;
+    const u = grade[num];
+    items += '<div class="other-unit-item" onclick="selectUnit('+num+')">'+
+      '<span class="ou-num" style="background:'+u.band+';">Юнит '+num+'</span>'+
+      '<span class="ou-title">'+u.title+'</span>'+
+      '<span class="ou-count">'+u.words.length+' слов</span>'+
+    '</div>';
+  });
+  return '<div class="other-units-block">'+
+    '<p class="other-units-title">Можно потренировать слова и из других юнитов:</p>'+
+    '<div class="other-units-grid">'+items+'</div>'+
+    '<button class="btn ghost" onclick="goToUnitList()">Все юниты</button>'+
+  '</div>';
+}
 function showSummary(){
   weakWords = WORDS.filter(w => marks[w.en] !== 'yes');
   const knowCount = WORDS.length - weakWords.length;
@@ -1782,19 +1806,17 @@ function showSummary(){
 
   if(weakWords.length === 0){
     body.innerHTML =
-      '<p style="text-align:center; color:var(--ink-soft); font-size:14px; margin-bottom:18px;">Ребёнок знает все слова этого юнита. Можно потренировать их ещё раз в игровом режиме или перейти к следующему юниту.</p>'+
-      '<button class="btn primary" onclick="trainAll()">Потренировать все слова</button>'+
-      '<div style="height:8px;"></div>'+
-      '<button class="btn ghost" onclick="goToUnitList()">Выбрать другой юнит</button>';
+      '<p style="text-align:center; color:var(--ink-soft); font-size:14px; margin-bottom:18px;">Ребёнок знает все слова этого юнита. Можно потренировать их ещё раз в игровом режиме.</p>'+
+      '<button class="btn primary" onclick="trainAll()">Тренировать эти слова ещё раз</button>'+
+      otherUnitsHTML();
   } else {
     let list = '<ul class="weak-list">';
     weakWords.forEach(w=>{
       list += '<li class="weak-item"><span class="emoji">'+w.emoji+'</span><span class="en">'+w.en+'</span><span class="ru">— '+w.ru+'</span></li>';
     });
     list += '</ul>';
-    body.innerHTML = list + '<button class="btn primary" onclick="showScreen(\'screen-trainpick\')">Начать тренировку этих слов →</button>';
+    body.innerHTML = list + '<button class="btn primary" onclick="showScreen(\'screen-trainpick\')">Тренировать эти слова →</button>' + otherUnitsHTML();
   }
-  showScreen('screen-summary');
 }
 function trainAll(){
   weakWords = WORDS.slice();
